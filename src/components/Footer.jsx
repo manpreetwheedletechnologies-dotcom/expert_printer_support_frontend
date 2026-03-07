@@ -1,57 +1,51 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import ContactPage from "./ContactPage";
-import blogsData from "../jsondata/BlogsData";
-
+import DisclaimerModal from "./Disclaimer";
 import { motion, AnimatePresence } from "framer-motion";
 
-function Footer() {
+function Footer({colorClass}) {
   const [openContact, setOpenContact] = useState(false);
   const navLinks = [
-    { label: "Home", path: "/" },
-    { label: "HP Printer", path: "https://www.hp.com/in-en/shop/hp-print-family" },
-    { label: "Canon Printer", path: "https://shop.in.canon/printing.html" },
-    { label: "Contact Us", path: "/" },
+    { label: "Privacy Policy ", path: "/" },
+    { label: "Terms of Service  ", path: "/" },
+    { label: "Refund Policy ", path: "/" },
+    { label: "Shipping Policy ", path: "/" },
   ];
-  const blogs = Object.keys(blogsData).map((key) => ({
-    label: blogsData[key].hero.title,
-    path: `/blog/${key}`,
-  }));
-
+  const [open, setOpen] = useState(false);
   const scrollToSection = (id) => {
-  const element = document.getElementById(id);
-  if (!element) return;
+    const element = document.getElementById(id);
+    if (!element) return;
 
-  const offset = 82; // header height
-  const targetPosition = element.getBoundingClientRect().top + window.scrollY - offset;
-  const startPosition = window.scrollY;
-  const distance = targetPosition - startPosition;
-  const duration = 800; // in milliseconds, increase for slower scroll
-  let startTime = null;
+    const offset = 82; // header height
+    const targetPosition = element.getBoundingClientRect().top + window.scrollY - offset;
+    const startPosition = window.scrollY;
+    const distance = targetPosition - startPosition;
+    const duration = 800; // in milliseconds, increase for slower scroll
+    let startTime = null;
 
-  const easeInOutQuad = (t) =>
-    t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    const easeInOutQuad = (t) =>
+      t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-  const animation = (currentTime) => {
-    if (!startTime) startTime = currentTime;
-    const timeElapsed = currentTime - startTime;
-    const progress = Math.min(timeElapsed / duration, 1);
-    const run = startPosition + distance * easeInOutQuad(progress);
-    window.scrollTo(0, run);
-    if (timeElapsed < duration) requestAnimationFrame(animation);
+    const animation = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      const progress = Math.min(timeElapsed / duration, 1);
+      const run = startPosition + distance * easeInOutQuad(progress);
+      window.scrollTo(0, run);
+      if (timeElapsed < duration) requestAnimationFrame(animation);
+    };
+
   };
-
-  requestAnimationFrame(animation);
-};
   return (
-    <footer className="w-full bg-[#5695D0]/5 text-black flex justify-center">
+    <footer className={`w-full ${colorClass} text-black flex justify-center`}>
       <div className="w-full flex flex-col items-center px-6 pb-8 sm:pb-10">
         <div className="w-full max-w-[1240px] min-h-[401px] px-6 sm:px-10 lg:px-[60px] py-[40px] flex flex-col gap-[35px]">
           {/* TOP ROW */}
           <div className="flex flex-col items-center text-center gap-5 sm:flex-row sm:items-start sm:justify-between sm:text-left">
             <img
-              src="/logo_l.svg"
-              alt="Wheedle Technologies"
+              src="/logo.svg"
+              alt="logo"
               className="h-18 lg:h-18 w-auto object-contain"
             />
           </div>
@@ -70,89 +64,46 @@ function Footer() {
               <ul className="space-y-2 flex flex-col items-center md:items-start">
                 {navLinks.map((item, i) => (
                   <li key={i}>
-                    {item.label === "Contact Us" ? (
-                      <button
-                        onClick={() => setOpenContact(true)}
-                        className="group relative inline-flex h-5 overflow-hidden text-sm font-medium cursor-pointer"
-                      >
-                        <span className="translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
-                          {item.label}
-                        </span>
-                        <span className="absolute translate-y-[150%] text-[#5695D0] transition duration-300 group-hover:translate-y-0">
-                          {item.label}
-                        </span>
-                      </button>
-                    ) : item.label === "Home" ? (
-                      <Link
-                        to="/"
-                        onClick={() =>
-                          window.scrollTo({ top: 0, behavior: "smooth" })
-                        }
-                        className="group relative inline-flex h-5 overflow-hidden text-sm font-medium"
-                      >
-                        <span className="translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
-                          {item.label}
-                        </span>
-                        <span className="absolute translate-y-[150%] text-[#5695D0] transition duration-300 group-hover:translate-y-0">
-                          {item.label}
-                        </span>
-                      </Link>
-                    ) : (
-                      <Link
-                        to={item.path}
-                        className="group relative inline-flex h-5 overflow-hidden text-sm font-medium"
-                        target="_blank"
-                      >
-                        <span className="translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
-                          {item.label}
-                        </span>
-                        <span className="absolute translate-y-[150%] text-[#5695D0] transition duration-300 group-hover:translate-y-0">
-                          {item.label}
-                        </span>
-                      </Link>
-                    )}
-                  </li>
-                ))}
-
-                {/* {navLinks.map((item, i) => (
-                  <li key={i}>
-                    <Link
-                      to={item.path}
-                      className="group relative inline-flex h-5 overflow-hidden text-sm font-medium"
+                    <button
+                      onClick={() => setOpenContact(true)}
+                      className="group relative inline-flex h-5 overflow-hidden text-sm font-medium cursor-pointer"
                     >
                       <span className="translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
                         {item.label}
                       </span>
-                      <span className="absolute translate-y-[150%] text-[#5695D0] transition duration-300 group-hover:translate-y-0">
+                      <span
+                        style={{ color: "var(--bg-color)" }}
+                        className="absolute translate-y-[150%] transition duration-300 group-hover:translate-y-0">
                         {item.label}
                       </span>
-                    </Link>
+                    </button>
                   </li>
-                ))} */}
+                ))}
               </ul>
             </div>
 
             {/* SERVICE SUITE */}
             <div>
-              <h4 className="text-sm font-semibold mb-4">Latest Blogs</h4>
+              <h4 className="text-sm font-semibold mb-4">Master Disclaimer</h4>
               <ul className="space-y-2 flex flex-col items-center md:items-start">
-                {blogs.map((service, i) => (
-                  <li key={i}>
-                    <Link
-                      onClick={() => scrollToSection('blog')}
-                      className="group relative block overflow-hidden text-sm font-medium leading-snug"
-                    >
-                      <span className="block transition-transform duration-300 group-hover:-translate-y-full">
-                        {service.label}
-                      </span>
-                      <span className="absolute left-0 top-0 block w-full translate-y-full text-[#5695D0] transition-transform duration-300 group-hover:translate-y-0">
-                        {service.label}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <button
+                  onClick={() => setOpen(true)}
+                    className="group relative inline-flex h-5 overflow-hidden text-sm font-medium cursor-pointer"
+                  >
+                    <span className="translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
+                      Disclaimer
+                    </span>
+                    <span
+                      style={{ color: "var(--bg-color)" }}
+                      className="absolute translate-y-[150%] transition duration-300 group-hover:translate-y-0">
+                      Disclaimer
+                    </span>
+                  </button>
+                </li>
               </ul>
             </div>
+            <DisclaimerModal isOpen={open} onClose={() => setOpen(false)} />
 
             {/* OTHER LINKS */}
             <div className="flex flex-col gap-6">
@@ -161,8 +112,8 @@ function Footer() {
 
                 <ul className="space-y-2 text-sm">
                   <li>(702) 555-0122</li>
-                  <li>support@expertprinter.com</li>
-                  <li>7529 E. Pecan St.</li>
+                  <li>help@techassistusa.com</li>
+                  <li>123 Tech Way, Suite 100</li>
                 </ul>
               </div>
 
@@ -172,7 +123,8 @@ function Footer() {
                   href=""
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-xl bg-[#5695D0] border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  className="w-11 h-11 rounded-xl border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  style={{ backgroundColor: "var(--bg-color)" }}
                 >
                   <svg
                     width="56"
@@ -198,7 +150,8 @@ function Footer() {
                   href=""
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-xl bg-[#5695D0] border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  className="w-11 h-11 rounded-xl border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  style={{ backgroundColor: "var(--bg-color)" }}
                 >
                   <svg
                     width="56"
@@ -226,7 +179,8 @@ function Footer() {
                   href=""
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-xl bg-[#5695D0] border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  className="w-11 h-11 rounded-xl border border-white/10 flex items-center justify-center transition-all hover:scale-105"
+                  style={{ backgroundColor: "var(--bg-color)" }}
                 >
                   <svg
                     width="56"
@@ -268,7 +222,7 @@ function Footer() {
         <div className="w-full max-w-[1240px] h-px bg-black/20 my-10" />
 
         <p className="text-center text-xs mb-4 sm:mb-6">
-          © 2025 <span className="font-semibold">Expert Printer</span> All
+          © 2026 <span className="font-semibold">Expert Printer</span> All
           Rights Reserved.
         </p>
       </div>

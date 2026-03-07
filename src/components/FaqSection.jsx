@@ -42,7 +42,7 @@ const FaqSection = () => {
   };
 
   return (
-    <section id="faq" className="bg-white py-16 px-4">
+    <section id="faq" className="bg-[#007DBA0D] py-16 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-12">

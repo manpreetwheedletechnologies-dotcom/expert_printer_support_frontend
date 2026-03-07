@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState, useEffect} from "react";
 import { TestimonialsData } from "../jsondata/TestimonialsData";
 
 
@@ -6,13 +6,37 @@ const testimonials = TestimonialsData;
 
 
 const Testimonials = () => {
+  const text = "Customer Experiences That Speak for Themselves";
+const [displayText, setDisplayText] = useState("");
+const [isDeleting, setIsDeleting] = useState(false);
+const [index, setIndex] = useState(0);
+
+
+useEffect(() => {
+  const typingSpeed = isDeleting ? 30 : 60;
+
+  const timeout = setTimeout(() => {
+    if (!isDeleting) {
+      setDisplayText(text.slice(0, index + 1));
+      setIndex(index + 1);
+      if (index + 1 === text.length) setTimeout(() => setIsDeleting(true), 1000);
+    } else {
+      setDisplayText(text.slice(0, index - 1));
+      setIndex(index - 1);
+      if (index - 1 === 0) setIsDeleting(false);
+    }
+  }, typingSpeed);
+
+  return () => clearTimeout(timeout);
+}, [index, isDeleting]);
   return (
-    <section className="bg-[#5695D0]/5 py-16 px-4">
+    <section className="bg-white py-16 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-black">
-            Customer Experiences That Speak for Themselves
+            {displayText}
+            <span className="animate-pulse ">|</span>
           </h2>
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
             Real feedback from customers who trust Expert Printer for fast, reliable, and professional printer support.

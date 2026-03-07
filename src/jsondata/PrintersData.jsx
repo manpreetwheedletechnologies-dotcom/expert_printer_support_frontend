@@ -66,25 +66,25 @@ const PrintersData = [
 // ACHIEVEMENTS DATA
  const AchievementsData = [
   {
-    icon: "/printer_icon.svg",
+    icon: "/printer_svg.svg",
     value: 2156,
     suffix: "+",
     label: "Printer Repaired",
   },
   {
-    icon: "/customer_icon.svg",
+    icon: "/cust_svg.svg",
     value: 2025,
     suffix: "+",
     label: "Happy Customers",
   },
   {
-    icon: "/rating_icon.svg",
+    icon: "/rating_svg.svg",
     value: 5,
     suffix: " Stars",
     label: "Ratings",
   },
   {
-    icon: "/rate_icon.svg",
+    icon: "/success_svg.svg",
     value: 100,
     suffix: "%",
     label: "Success Rate",
@@ -100,26 +100,25 @@ const PrintersData = [
 
 const PrinterRepairServicesData = [
   {
-    bgIcon: "/repair_icon.svg",
-    icon: "/right_icon.svg",
+    icon: "/done_svg.svg",
     value: 99,
     suffix: "%",
     title: "Issue Resolution Rate",
   },
   {
-    icon: "/call_icon.svg",
+    icon: "/call_svg.svg",
     value: 24,
     suffix: "/7",
     title: "Live Support Availability",
   },
   {
-    icon: "/guarentee_icon.svg",
+    icon: "/money_svg.svg",
     value: 4.9,
     suffix: "★",
     title: "Customer Satisfaction Rating",
   },
   {
-    icon: "/support_icon.svg",
+    icon: "/headfn_svg.svg",
     value: 30,
     suffix: "-Minute",
     title: "Average Response Time",

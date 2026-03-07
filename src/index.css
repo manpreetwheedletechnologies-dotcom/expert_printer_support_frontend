@@ -1,4 +1,7 @@
 @import "tailwindcss";
+:root {
+  --bg-color: #007DBA;
+}
 
 body {
   font-family: 'Inter', sans-serif;

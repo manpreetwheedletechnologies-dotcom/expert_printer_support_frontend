@@ -62,7 +62,7 @@ const RecentBlogs = () => {
   const closeModal = () => setActiveBlogSlug(null);
 
   return (
-    <section id="blog" className="bg-white py-16 px-4 relative z-0">
+    <section id="blog" className="bg-[#007DBA0D] py-16 px-4 relative z-0">
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-12">
@@ -93,8 +93,9 @@ const RecentBlogs = () => {
                 <p className="mt-3 text-gray-600 text-sm flex-1">{blog.description}</p>
 
                 <button
+                  style={{ backgroundColor: "var(--bg-color)" }}
                   onClick={() => openModal(blog.slug)}
-                  className="mt-6 bg-[#5695D0] hover:opacity-90 transition text-white py-3 rounded-xl font-medium cursor-pointer"
+                  className="mt-6 hover:opacity-90 transition text-white py-3 rounded-xl font-medium cursor-pointer"
                 >
                   Read More
                 </button>

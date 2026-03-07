@@ -7,10 +7,10 @@ const ReasonsToChooseUs = () => {
   };
 
   return (
-    <section className="w-full py-12">
+    <section className="w-full py-12 bg-[#007DBA0D]">
       <div className="w-full max-w-[94%] mx-auto px-4 sm:px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-stretch">
         {/* Left Image */}
-        <div className="w-full overflow-hidden rounded-3xl h-full min-h-[300px]">
+        <div className="w-full overflow-hidden rounded-3xl h-full min-h-[300px] max-h-[700px]">
           <img
             src="/reason.png"
             alt="Printer Support"
@@ -19,7 +19,7 @@ const ReasonsToChooseUs = () => {
         </div>
 
         {/* Right Content */}
-        <div className="bg-[#5695D0] rounded-3xl p-6 md:p-10 text-white flex flex-col h-full">
+        <div style={{ backgroundColor: "var(--bg-color)" }} className="rounded-3xl p-6 md:p-10 text-white flex flex-col h-full">
           <div>
             <h2 className="text-3xl md:text-5xl mb-4 text-center">
               Why Expert Printer?
@@ -40,7 +40,7 @@ const ReasonsToChooseUs = () => {
           {/* Button */}
           <button
             onClick={scrollToHero}
-            className="bg-white text-[#5A96D1] font-medium px-6 py-3 sm:px-7 sm:py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+            className="mt-10 bg-white text-[#5A96D1] font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
           >
             Fix It Now
           </button>

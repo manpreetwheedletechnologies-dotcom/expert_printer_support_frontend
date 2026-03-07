@@ -8,20 +8,25 @@ import PrinterRepairServices from '../components/PrinterRepairServices'
 import ReasonsToChooseUs from '../components/ReasonsToChooseUs'
 import RecentBlogs from '../components/RecentBlogs'
 import Testimonials from '../components/Testimonials'
-
+import ServicesSection from '../components/Services'
+import CertificateSection from '../components/Certificatesection'
+import Aboutus from '../components/Aboutus'
 function LandingPage() {
   return (
     <>
     <Header/>
     <PrinterSupportHero/>
+    <ServicesSection/>
+    <CertificateSection/>
     <PrinterBrands/>
+    <RecentBlogs/>
     <AchievementsPage/>
     <ReasonsToChooseUs/> 
     <PrinterRepairServices/>
-    <RecentBlogs/>
+    <Aboutus/>
     <Testimonials/>
     <FaqSection/>
-    <Footer/> 
+    <Footer colorClass="bg-white"/> 
     </>
   )
 }

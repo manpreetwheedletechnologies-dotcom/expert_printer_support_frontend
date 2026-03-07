@@ -72,12 +72,38 @@ export default function PrinterRepairServices() {
     });
   }, [isVisible]);
 
+    const text = "Trusted AI-Powered Online Printer Support";
+    const [displayText, setDisplayText] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [index, setIndex] = useState(0);
+  
+    // State to control modal
+  
+    useEffect(() => {
+      const typingSpeed = isDeleting ? 30 : 60;
+  
+      const timeout = setTimeout(() => {
+        if (!isDeleting) {
+          setDisplayText(text.slice(0, index + 1));
+          setIndex(index + 1);
+          if (index + 1 === text.length) setTimeout(() => setIsDeleting(true), 1000);
+        } else {
+          setDisplayText(text.slice(0, index - 1));
+          setIndex(index - 1);
+          if (index - 1 === 0) setIsDeleting(false);
+        }
+      }, typingSpeed);
+  
+      return () => clearTimeout(timeout);
+    }, [index, isDeleting]);
+
   return (
-    <div ref={sectionRef} className="bg-[#5695D0]/5 py-16 px-4 sm:px-6 lg:px-8">
+    <div ref={sectionRef} className="bg-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <h1 className="text-center text-3xl md:text-4xl font-bold text-black">
-          Trusted AI-Powered Online Printer Support
+          {displayText}
+            <span className="animate-pulse ">|</span>
         </h1>
 
         {/* Description */}

@@ -63,17 +63,19 @@ function AchievementsPage() {
   return (
     <div
       ref={sectionRef}
-      className="bg-[#5695D0]/5 py-12 sm:py-16 lg:py-20 px-6 sm:px-10 lg:px-20"
+      className="bg-white py-12 sm:py-16 lg:py-20 px-6 sm:px-10 lg:px-20"
     >
       <div className="max-w-7xl mx-auto w-full py-12 sm:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-28 items-center">
           {/* Left Content */}
           <div className="space-y-6">
             <div className="space-y-2">
-              <h3 className="text-[#5695D0] uppercase tracking-wider text-lg font-semibold">
+              <h3
+              style={{ color: "var(--bg-color)" }}
+              className="uppercase tracking-wider text-lg">
                 Printer Issues? We’ve Got You Covered
               </h3>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight">
                 Dependable Printer Support
                 <br />
                 That You Can Trust
@@ -94,7 +96,7 @@ function AchievementsPage() {
               customized and trained to behave as your personal online printer
               support hub.
             </p>
-            <div className="w-40 sm:w-60 lg:w-80 h-1 bg-[#5695D0]"></div>
+            <div style={{ backgroundColor: "var(--bg-color)" }} className="w-40 sm:w-60 lg:w-80 h-1"></div>
           </div>
 
           {/* Right Stats Grid */}
@@ -102,10 +104,10 @@ function AchievementsPage() {
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="bg-white rounded-3xl p-5 sm:p-8 border border-gray-200 shadow-[6px_6px_0_#5695D0] hover:shadow-[8px_8px_0_#5B8FD9] transition-all duration-300"
+                className="bg-white rounded-3xl p-5 sm:p-8 border border-gray-200 shadow-[6px_6px_0_#007DBA] hover:shadow-[8px_8px_0_#007DBA] transition-all duration-300"
               >
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="text-blue-500">{stat.icon}</div>
+                  <div>{stat.icon}</div>
                   <div className="space-y-2">
                     <div className="text-4xl font-bold text-gray-900">
                       {counts[index].toLocaleString()}

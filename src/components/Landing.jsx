@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 
 const PrinterSupportHero = () => {
   const [formData, setFormData] = useState({
@@ -50,13 +51,6 @@ const PrinterSupportHero = () => {
     }
   };
 
-  const checkmarks = [
-    "24/7 AI Chatbot Support",
-    "Fast Issue Resolution Time",
-    "High First-Contact Resolution Rate",
-    "Customer Satisfaction-Driven Support",
-  ];
-
   const inputClass =
     "w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5695D0] focus:border-[#5695D0] transition";
 
@@ -72,7 +66,7 @@ const PrinterSupportHero = () => {
           style={{ backgroundImage: 'url("/home_bg.png")' }}
         />
         {/* Overlay */}
-        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 bg-[#007DBA80]" />
 
         {/* Content wrapper */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-20 sm:py-24 lg:py-28">
@@ -81,43 +75,38 @@ const PrinterSupportHero = () => {
             {/* ── LEFT: Text content ── */}
             <div className="text-white space-y-5 sm:space-y-6">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                Reliable Printer Troubleshooting &amp; Support Services
+                Expert Systems Assistance & Authorized Hardware Solutions.
               </h1>
 
               <p className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed">
-                Expert Printer is a recognized name in online printer support
-                and troubleshooting, trusted by users across the USA for
-                dependable and secure assistance. We specialize in resolving
-                common and complex printer issues, including driver updates,
-                connectivity errors, paper jams, offline problems, and
-                performance-related concerns. Our AI-Powered Printer Online Help
-                Desk combines intelligent chatbot support with expert guidance
-                to deliver fast and effective solutions.
+                Patient, live online guidance for seniors and home offices. We help you stay connected without the frustration.
               </p>
+              <NavLink to="/support">
+              <button
+                style={{ backgroundColor: "var(--bg-color)" }}
+                className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-lg cursor-pointer px-6 font-medium text-white"
+              >
+                <span>Get Live Help Now</span>
 
-              <ul className="space-y-2.5 sm:space-y-3 pt-1">
-                {checkmarks.map((text, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center gap-3 transition-transform duration-300 ease-in-out hover:translate-x-2 cursor-default"
+                <div className="w-0 translate-x-[100%] pl-0 opacity-0 transition-all duration-200 group-hover:w-5 group-hover:translate-x-0 group-hover:pl-1 group-hover:opacity-100">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 15 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
                   >
-                    <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6">
-                      <svg viewBox="0 0 20 20" fill="none">
-                        <circle cx="10" cy="10" r="10" fill="#5695D0" />
-                        <path
-                          d="M6 10l2.7 2.8L14 7.8"
-                          stroke="white"
-                          strokeWidth="2"
-                          fill="none"
-                        />
-                      </svg>
-                    </span>
-                    <span className="text-sm sm:text-base lg:text-lg font-medium">
-                      {text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                    <path
+                      d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z"
+                      fill="currentColor"
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </button>
+             </NavLink>
             </div>
 
             {/* ── RIGHT: Form ── */}
@@ -211,13 +200,13 @@ const PrinterSupportHero = () => {
 
                   {/* Submit */}
                   <button
+                    style={{ backgroundColor: "var(--bg-color)" }}
                     type="submit"
                     disabled={loading}
-                    className={`w-full text-white py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base transition shadow-lg ${
-                      loading
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#5695D0] hover:opacity-90 cursor-pointer"
-                    }`}
+                    className={`w-full text-white py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base transition shadow-lg ${loading
+                      ? "cursor-not-allowed"
+                      : "hover:opacity-90 cursor-pointer"
+                      }`}
                   >
                     {loading ? "Submitting..." : "Submit"}
                   </button>
