@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, NavLink } from "react-router-dom";
 import ContactPage from "./ContactPage";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
 import { useWishlistCount } from "./Printer_brands";
 import WishlistDrawer from "./Wishlist";
@@ -103,6 +104,7 @@ function Header() {
   };
 
   const closeWishlist = useCallback(() => setWishlistOpen(false), []);
+const location = useLocation();
 
   return (
     <>
@@ -127,42 +129,49 @@ function Header() {
 
           {/* ── Desktop Nav ── */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
-            {navLinks.map((link, index) => (
-              <div key={link.name} className="flex items-center gap-6 xl:gap-8">
-                {link.name === "Home" || link.name === "Service" ? (
-                  <NavLink
-                    to={link.path}
-                    className={({ isActive }) =>
-                      `group relative h-6 overflow-hidden text-[15px] xl:text-[16px] font-medium transition-all duration-300 ${
-                        isActive ? "text-[#007DBA]" : "text-black/80"
-                      }`
-                    }
-                  >
-                    <span className="block translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
-                      {link.name}
-                    </span>
-                    <span className="absolute left-0 top-0 block translate-y-[150%] text-[#007DBA] transition duration-300 group-hover:translate-y-0">
-                      {link.name}
-                    </span>
-                  </NavLink>
-                ) : (
-                  <button
-                    onClick={() => scrollToSection(link.name.toLowerCase())}
-                    className="group relative h-6 overflow-hidden text-[15px] xl:text-[16px] font-medium transition-all duration-300 text-black/80 cursor-pointer"
-                  >
-                    <span className="block translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
-                      {link.name}
-                    </span>
-                    <span className="absolute left-0 top-0 block translate-y-[150%] text-[#007DBA] transition duration-300 group-hover:translate-y-0">
-                      {link.name}
-                    </span>
-                  </button>
-                )}
-                {index < navLinks.length - 1 && (
-                  <span className="text-black/20 select-none">|</span>
-                )}
-              </div>
-            ))}
+{navLinks
+  .filter(
+    (link) =>
+      location.pathname === "/" ||
+      (link.name !== "Blog" && link.name !== "FAQ")
+  )
+  .map((link, index, arr) => (
+    <div key={link.name} className="flex items-center gap-6 xl:gap-8">
+      {link.name === "Home" || link.name === "Service" ? (
+        <NavLink
+          to={link.path}
+          className={({ isActive }) =>
+            `group relative h-6 overflow-hidden text-[15px] xl:text-[16px] font-medium transition-all duration-300 ${
+              isActive ? "text-[#007DBA]" : "text-black/80"
+            }`
+          }
+        >
+          <span className="block translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
+            {link.name}
+          </span>
+          <span className="absolute left-0 top-0 block translate-y-[150%] text-[#007DBA] transition duration-300 group-hover:translate-y-0">
+            {link.name}
+          </span>
+        </NavLink>
+      ) : (
+        <button
+          onClick={() => scrollToSection(link.name.toLowerCase())}
+          className="group relative h-6 overflow-hidden text-[15px] xl:text-[16px] font-medium transition-all duration-300 text-black/80 cursor-pointer"
+        >
+          <span className="block translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
+            {link.name}
+          </span>
+          <span className="absolute left-0 top-0 block translate-y-[150%] text-[#007DBA] transition duration-300 group-hover:translate-y-0">
+            {link.name}
+          </span>
+        </button>
+      )}
+
+      {index < arr.length - 1 && (
+        <span className="text-black/20 select-none">|</span>
+      )}
+    </div>
+  ))}
           </nav>
 
           {/* ── Right Side ── */}

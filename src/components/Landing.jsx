@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-
+import { API_BASE } from "../lib/constants";
 const PrinterSupportHero = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -36,12 +36,18 @@ const PrinterSupportHero = () => {
     if (!validateForm()) return;
     try {
       setLoading(true);
-      const response = await fetch("https://your-api-endpoint.com/submit", {
+      const res = await fetch(`${API_BASE}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        }),
       });
-      if (!response.ok) throw new Error("Failed to submit");
+
+      if (!res.ok) throw new Error("Failed to submit");
       setFormData({ name: "", phone: "", email: "", message: "" });
       setShowPopup(true);
     } catch {

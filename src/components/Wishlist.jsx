@@ -175,7 +175,9 @@ function WishlistDrawer({ open, onClose }) {
 
                         {/* Buttons */}
                         <div className="flex items-center gap-3">
-                          <button className="px-4 h-9 rounded-lg bg-[#5695D0] hover:bg-[#4580bb] text-white text-sm font-medium transition-colors duration-200">
+                          <button 
+                          onClick={() => window.open(item.url, "_blank")}
+                          className="px-4 h-9 rounded-lg bg-[#5695D0] hover:bg-[#4580bb] text-white text-sm font-medium transition-colors duration-200">
                             Buy Now
                           </button>
 

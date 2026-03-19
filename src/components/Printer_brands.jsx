@@ -1,94 +1,52 @@
 import { useState, useEffect } from "react";
+import { API_BASE } from "../lib/constants";
 
-// ─── Temp placeholder image (replace with real scraped image URLs) ────────────
-const PLACEHOLDER_IMG = "https://images-cdn.ubuy.co.in/67cdb26d5af3ca779640523e-hp-officejet-3830-all-in-one-printer.jpg";
-
-// ─── Sample data — structure matches your Python scraper output ───────────────
-const scrapedPrinters = [
-  {
-    id: "hp-officejet-pro-8139e-1",
-    name: "HP OfficeJet Pro 8139e Wireless All-in-One Printer with 1 Full Year Instant Ink with HP+, AI-enabled",
-    price: 349.0,
-    original_price: 499.0,
-    image: PLACEHOLDER_IMG,
-    in_stock: true,
-  },
-  {
-    id: "hp-officejet-pro-8139e-2",
-    name: "HP OfficeJet Pro 8139e Wireless All-in-One Printer with 1 Full Year Instant Ink with HP+, AI-enabled",
-    price: 349.0,
-    original_price: 499.0,
-    image: PLACEHOLDER_IMG,
-    in_stock: true,
-  },
-  {
-    id: "hp-officejet-pro-8139e-3",
-    name: "HP OfficeJet Pro 8139e Wireless All-in-One Printer with 1 Full Year Instant Ink with HP+, AI-enabled",
-    price: 349.0,
-    original_price: 499.0,
-    image: PLACEHOLDER_IMG,
-    in_stock: true,
-  },
-  {
-    id: "hp-officejet-pro-8139e-4",
-    name: "HP OfficeJet Pro 8139e Wireless All-in-One Printer with 1 Full Year Instant Ink with HP+, AI-enabled",
-    price: 349.0,
-    original_price: 499.0,
-    image: PLACEHOLDER_IMG,
-    in_stock: true,
-  },
-  {
-    id: "hp-officejet-pro-8139e-5",
-    name: "HP OfficeJet Pro 8139e Wireless All-in-One Printer with 1 Full Year Instant Ink with HP+, AI-enabled",
-    price: 349.0,
-    original_price: 499.0,
-    image: PLACEHOLDER_IMG,
-    in_stock: true,
-  },
-  {
-    id: "hp-officejet-pro-8139e-6",
-    name: "HP OfficeJet Pro 8139e Wireless All-in-One Printer with 1 Full Year Instant Ink with HP+, AI-enabled",
-    price: 349.0,
-    original_price: 499.0,
-    image: PLACEHOLDER_IMG,
-    in_stock: true,
-  },
-];
+// ─── Placeholder Image ───────────────────────────────────────────────
+const PLACEHOLDER_IMG =
+  "https://images-cdn.ubuy.co.in/67cdb26d5af3ca779640523e-hp-officejet-3830-all-in-one-printer.jpg";
 
 // =============================================================================
 // WISHLIST HELPERS
-// Exported so Header.jsx and WishlistPage.jsx can import them too
 // =============================================================================
 
-/** Read wishlist array from localStorage */
 export const getWishlist = () =>
   JSON.parse(localStorage.getItem("wishlist") || "[]");
 
-/** Save wishlist + fire "storage" event so Header badge updates instantly */
 export const saveWishlist = (items) => {
   localStorage.setItem("wishlist", JSON.stringify(items));
   window.dispatchEvent(new Event("storage"));
 };
 
-/** Check if product already in wishlist */
 export const isInWishlist = (id) =>
   getWishlist().some((item) => item.id === id);
 
-/** Add product with quantity=1 (skips if already present) */
 export const addToWishlist = (product) => {
   const current = getWishlist();
+
   if (!current.find((item) => item.id === product.id)) {
-    saveWishlist([...current, { ...product, quantity: 1 }]);
+    saveWishlist([
+      ...current,
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        original_price: product.original_price,
+        image: product.image,
+        url: product.url, // ✅ IMPORTANT
+        quantity: 1,
+      },
+    ]);
   }
 };
 
-/** Remove product by id */
 export const removeFromWishlist = (id) =>
   saveWishlist(getWishlist().filter((item) => item.id !== id));
 
-/** Update quantity; removes item if qty reaches 0 */
 export const updateWishlistQty = (id, qty) => {
-  if (qty <= 0) { removeFromWishlist(id); return; }
+  if (qty <= 0) {
+    removeFromWishlist(id);
+    return;
+  }
   saveWishlist(
     getWishlist().map((item) =>
       item.id === id ? { ...item, quantity: qty } : item
@@ -96,13 +54,13 @@ export const updateWishlistQty = (id, qty) => {
   );
 };
 
-/** Total quantity across ALL wishlist items (used for header badge) */
 export const getWishlistTotalQty = () =>
   getWishlist().reduce((sum, item) => sum + (item.quantity || 1), 0);
 
 // =============================================================================
-// CUSTOM HOOK — useWishlistCount
+// HOOK
 // =============================================================================
+
 export function useWishlistCount() {
   const [count, setCount] = useState(getWishlistTotalQty);
 
@@ -116,8 +74,9 @@ export function useWishlistCount() {
 }
 
 // =============================================================================
-// PRINTER CARD
+// CARD
 // =============================================================================
+
 function PrinterCard({ product }) {
   const [inWishlist, setInWishlist] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -252,53 +211,69 @@ function PrinterCard({ product }) {
 }
 
 // =============================================================================
-// MAIN EXPORT
-// Usage:  <PrinterListing printers={yourScrapedData} />
-// If no prop is passed, the sample scrapedPrinters array is used as default.
+// MAIN COMPONENT
 // =============================================================================
-export default function PrinterListing({ printers = scrapedPrinters }) {
-  const text = "Pick Your Printer";
-  const [displayText, setDisplayText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [index, setIndex] = useState(0);
 
+export default function PrinterListing() {
+  const [printers, setPrinters] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ FETCH API
   useEffect(() => {
-    const typingSpeed = isDeleting ? 30 : 60;
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/scrape/hp-printers`
+        );
+        const data = await res.json();
 
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        setDisplayText(text.slice(0, index + 1));
-        setIndex(index + 1);
-        if (index + 1 === text.length) setTimeout(() => setIsDeleting(true), 1000);
-      } else {
-        setDisplayText(text.slice(0, index - 1));
-        setIndex(index - 1);
-        if (index - 1 === 0) setIsDeleting(false);
+        if (data.success) {
+          const formatted = data.data.map((item, i) => ({
+            id: item.id || i,
+            name: item.name,
+            price: Number(item.price) || 0,
+            original_price:
+            Number(item.original_price) || Number(item.price) || 0,
+            image: item.image || PLACEHOLDER_IMG,
+            url: item.url || "#", // ✅ ADD THIS
+            in_stock: true,
+          }));
+
+          setPrinters(formatted);
+        }
+      } catch (err) {
+        console.error("API Error:", err);
+      } finally {
+        setLoading(false);
       }
-    }, typingSpeed);
+    };
 
-    return () => clearTimeout(timeout);
-  }, [index, isDeleting]);
+    fetchData();
+  }, []);
+
+  // ⏳ Loading
+  if (loading) {
+    return (
+      <div className="text-center py-20 text-lg font-semibold">
+        Loading printers...
+      </div>
+    );
+  }
 
   return (
-    <section className="py-14 px-4" >
-      <div className="max-w-7xl mx-auto" >
-        <div className="text-center mb-10" >
-          <h2 className="text-3xl md:text-4xl font-bold text-black" >
-            {displayText}
-            < span className="animate-pulse" >| </span>
-          </h2>
-          < p className="mt-4 text-gray-600 max-w-2xl mx-auto" >
-            Discover the Right Printing Partner from Leading Brands
-          </p>
+    <section className="py-14 px-4">
+      <div className="max-w-7xl mx-auto">
+
+        <h2 className="text-3xl font-bold text-center mb-10">
+          Pick Your Printer
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {printers.map((printer) => (
+            <PrinterCard key={printer.id} product={printer} />
+          ))}
         </div>
-        < div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" >
-          {
-            printers.map((printer) => (
-              <PrinterCard key={printer.id} product={printer} />
-            ))
-          }
-        </div>
+
       </div>
     </section>
   );

@@ -35,13 +35,11 @@ export default function DashboardLayout({
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-3 mb-8">
-          <div className="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
-            <Icon name="phone" cls="w-4 h-4 text-white"/>
-          </div>
-          <div>
-            <span className="block text-sm font-bold text-gray-900 leading-tight">Tech</span>
-            <span className="block text-sm font-bold text-blue-500 leading-tight">for Call</span>
-          </div>
+                     <img
+              src="/logo.svg"
+              alt="logo"
+              className="h-12 lg:h-14 w-auto object-contain"
+            />
         </div>
 
         {/* Role badge */}
@@ -62,7 +60,7 @@ export default function DashboardLayout({
             <button key={label} onClick={() => onNavChange(label)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left w-full
                 ${activeNav === label
-                  ? "bg-blue-500 text-white"
+                  ? "bg-[#007DBA] text-white"
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                 }`}>
               <Icon name={icon} cls="w-4 h-4 shrink-0"/>
