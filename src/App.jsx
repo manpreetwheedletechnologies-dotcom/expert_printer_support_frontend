@@ -18,12 +18,11 @@ import ProtectedRoute     from "./components/ProtectedRoute";
 function App() {
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  // onComplete is called by Preloader once every image has loaded.
+  // The 6s cap inside Preloader means this will always fire — no infinite spinner.
+  const handlePreloaderDone = () => setLoading(false);
 
-  if (loading) return <Preloader />;
+  if (loading) return <Preloader onComplete={handlePreloaderDone} />;
 
   return (
     <Routes>
@@ -34,30 +33,23 @@ function App() {
       <Route path="/services" element={<ServicePage />} />
 
       {/* ── Auth ──────────────────────────────────────────────────────── */}
-      {/* /login → auto-redirects to correct dashboard if already logged in */}
       <Route path="/login" element={<LoginPage />} />
 
       {/* ── Protected dashboards (role-gated) ─────────────────────────── */}
-
-      {/* Admin only — agent visiting this URL gets sent to /dashboard/agent */}
       <Route path="/dashboard/admin" element={
         <ProtectedRoute allowedRole="admin">
           <AdminDashboardPage />
         </ProtectedRoute>
       }/>
 
-      {/* Agent only — admin visiting this URL gets sent to /dashboard/admin */}
       <Route path="/dashboard/agent" element={
         <ProtectedRoute allowedRole="agent">
           <AgentDashboardPage />
         </ProtectedRoute>
       }/>
 
-      {/* Bare /dashboard → redirect to role-specific dashboard */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          {/* ProtectedRoute with no allowedRole just checks token,
-              then redirects to /dashboard/:role automatically */}
           <AdminDashboardPage />
         </ProtectedRoute>
       }/>

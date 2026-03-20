@@ -1,4 +1,58 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+
+// ─── COMPLETE list of every image used in the project ────────────────────────
+// Add any new images here so they get preloaded too
+const ALL_IMAGES = [
+  // Core UI
+  "/logo.svg",
+  "/Vector.svg",
+  "/atlas_icon.svg",
+  "/bot_text.svg",
+  // Hero / backgrounds
+  "/home_bg.png",
+  // About / sections
+  "/aboutus.png",
+  "/reason.png",
+  "/certification.png",
+  // Printer issue icons
+  "/ink.png",
+  "/memory.png",
+  "/trouble.png",
+  "/printer_.png",
+  // Service icons (SVG)
+  "/call_svg.svg",
+  "/cust_svg.svg",
+  "/done_svg.svg",
+  "/headfn_svg.svg",
+  "/money_svg.svg",
+  "/printer_svg.svg",
+  "/rating_svg.svg",
+  "/success_svg.svg",
+  // Services section
+  "/onsite.png",
+  // Contact / Help forms
+  "/public/contact.png",
+  "/public/help.png",
+  // Blog images
+  "/b1.png",
+  "/b2.png",
+  "/b3.png",
+  "/b4.png",
+  "/b5.png",
+  "/b6.png",
+  "/b7.png",
+  "/b8.png",
+  "/b9.png",
+  "/b10.png",
+  "/b12.png",
+  "/b13.png",
+  "/blogstep1.png",
+  "/blogstep2.png",
+  "/blogstep3.png",
+  "/blogstep4.png",
+  "/blogstep5.png",
+  "/blogstep6.png",
+];
 
 // Only keyframes & named animation classes — everything else is Tailwind
 const keyframes = `
@@ -32,10 +86,6 @@ const keyframes = `
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes slide {
-    0%   { transform: translateX(-120%); }
-    100% { transform: translateX(300%); }
-  }
 
   .ring        { animation: expandRing 3s ease-out infinite; }
   .ring-1      { animation-delay: 0s; }
@@ -54,14 +104,13 @@ const keyframes = `
     animation: drawPath 1.8s ease forwards 0.3s, fillIn 0.5s ease forwards 2.1s;
   }
 
-  .dot         { animation: blink 1.4s ease-in-out infinite; }
-  .dot-1       { animation-delay: 0s; }
-  .dot-2       { animation-delay: 0.2s; }
-  .dot-3       { animation-delay: 0.4s; }
+  .dot   { animation: blink 1.4s ease-in-out infinite; }
+  .dot-1 { animation-delay: 0s; }
+  .dot-2 { animation-delay: 0.2s; }
+  .dot-3 { animation-delay: 0.4s; }
 
-  .pl-label    { animation: fadeUp 1s ease forwards 0.5s; opacity: 0; }
-  .pl-track    { animation: fadeUp 1s ease forwards 0.7s; opacity: 0; }
-  .pl-bar      { animation: slide 2s ease-in-out infinite 1s; }
+  .pl-label { animation: fadeUp 1s ease forwards 0.5s; opacity: 0; }
+  .pl-track { animation: fadeUp 1s ease forwards 0.7s; opacity: 0; }
 `;
 
 const RINGS = [
@@ -71,10 +120,14 @@ const RINGS = [
   { size: "w-[280px] h-[280px]", cls: "ring-4" },
 ];
 
-export default function Preloader({ label = "Loading" }) {
-  const [mounted, setMounted] = useState(false);
+export default function Preloader({ onComplete, label = "Loading" }) {
+  const [mounted,  setMounted]  = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [status,   setStatus]   = useState("Initializing...");
+  const calledRef  = useRef(false); // prevent double-fire
 
   useEffect(() => {
+    // Inject keyframe styles once
     if (!document.getElementById("pl-keyframes")) {
       const tag = document.createElement("style");
       tag.id = "pl-keyframes";
@@ -82,6 +135,39 @@ export default function Preloader({ label = "Loading" }) {
       document.head.appendChild(tag);
     }
     setMounted(true);
+
+    const total = ALL_IMAGES.length;
+    let loaded = 0;
+
+    const done = () => {
+      if (calledRef.current) return;
+      calledRef.current = true;
+      setProgress(100);
+      setStatus("Ready!");
+      // Brief pause so user sees 100% before site appears
+      setTimeout(() => onComplete?.(), 350);
+    };
+
+    const onLoad = () => {
+      loaded++;
+      const pct = Math.min(Math.round((loaded / total) * 100), 99);
+      setProgress(pct);
+      setStatus(`Loading assets... ${loaded} / ${total}`);
+      if (loaded >= total) done();
+    };
+
+    // Start all image loads in parallel
+    setStatus(`Loading assets... 0 / ${total}`);
+    ALL_IMAGES.forEach((src) => {
+      const img = new Image();
+      img.onload  = onLoad;
+      img.onerror = onLoad; // count failures too — don't block
+      img.src     = src;
+    });
+
+    // Hard safety cap — never show preloader more than 6 seconds
+    const cap = setTimeout(done, 6000);
+    return () => clearTimeout(cap);
   }, []);
 
   if (!mounted) return null;
@@ -134,13 +220,30 @@ export default function Preloader({ label = "Loading" }) {
         {label}
       </p>
 
-      {/* Progress track */}
-      <div className="pl-track relative z-10 mt-7 w-40 h-[2px] rounded-full overflow-hidden bg-[rgba(86,149,208,0.1)]">
-        <div
-          className="pl-bar h-full w-[60%] rounded-full"
-          style={{ background: "linear-gradient(90deg, transparent, #5695D0, transparent)" }}
-        />
+      {/* Real progress bar */}
+      <div className="pl-track relative z-10 mt-6 w-52 flex flex-col items-center gap-2">
+        {/* Track */}
+        <div className="w-full h-[3px] rounded-full overflow-hidden bg-[rgba(86,149,208,0.12)]">
+          <div
+            className="h-full rounded-full transition-all duration-300 ease-out"
+            style={{
+              width: `${progress}%`,
+              background: "linear-gradient(90deg, #2e6bad, #5695D0, #88bde8)",
+              boxShadow: "0 0 8px rgba(86,149,208,0.6)",
+            }}
+          />
+        </div>
+        {/* Percentage + status */}
+        <div className="flex items-center justify-between w-full">
+          <p className="text-[10px] tracking-[0.15em] text-[rgba(86,149,208,0.4)]">
+            {status}
+          </p>
+          <p className="text-[10px] font-medium text-[rgba(86,149,208,0.6)]">
+            {progress}%
+          </p>
+        </div>
       </div>
+
     </div>
   );
 }
