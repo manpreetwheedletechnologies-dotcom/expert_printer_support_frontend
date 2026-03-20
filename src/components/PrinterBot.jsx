@@ -20,18 +20,10 @@ const ISSUE_OPTIONS = [
   { label: "🔧 Other Issue",        value: "__other__" },
 ];
 
-const BRAND_OPTIONS = ["HP","Canon","Epson","Brother","Xerox","Ricoh","Kyocera","Samsung","Other"];
+const BRAND_OPTIONS = ["HP"];
 
 const MODELS_BY_BRAND = {
   HP:      ["DeskJet 2700","OfficeJet Pro 9015","LaserJet Pro M404n","ENVY 6055","LaserJet MFP M428","Other"],
-  Canon:   ["PIXMA MG3620","PIXMA TR8620","imageCLASS MF445dw","PIXMA G7020","imageCLASS LBP6030","Other"],
-  Epson:   ["EcoTank ET-2720","WorkForce WF-3820","Expression ET-3850","EcoTank Pro ET-5850","SureColor P700","Other"],
-  Brother: ["HL-L2350DW","MFC-L2710DW","DCP-L2550DW","HL-L3210CW","MFC-J995DW","Other"],
-  Xerox:   ["VersaLink C405","WorkCentre 6515","Phaser 6510","VersaLink B405","Other"],
-  Ricoh:   ["SP 3610SF","IM C300","MP C307","SP 330DN","Other"],
-  Kyocera: ["ECOSYS M2535dn","ECOSYS P2235dn","TASKalfa 2553ci","ECOSYS M5526cdw","Other"],
-  Samsung: ["Xpress M2020W","Xpress M2070FW","ProXpress M4020ND","Other"],
-  Other:   ["Other"],
 };
 
 const VALIDATORS = {

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIG — change BASE_URL to match your FastAPI server
 // ─────────────────────────────────────────────────────────────────────────────
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://printerexperts.online";
 
 // Toggle to false to force static fallback (simulate API being down)
 const API_ENABLED = true;

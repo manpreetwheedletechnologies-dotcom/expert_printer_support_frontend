@@ -35,6 +35,7 @@ function normaliseLead(l) {
       ? `${l.printerBrand} ${l.printerModel || ""}`.trim()
       : l.printer || "—",
     issue:    l.message || l.issue || "—",
+    amount:   l.amount || 0,
     status:   l.status  || "new",
     created_at: l.createdAt || l.created_at,
   };
@@ -738,7 +739,7 @@ function LeadsView({ search }) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
-              {["ID","Customer","Email","Phone","Printer","Issue","Status","Created","Action"].map(h=>(
+              {["ID","Customer","Email","Phone","Printer","Issue","Amount","Status","Created","Action"].map(h=>(
                 <th key={h} className="text-left text-xs font-medium text-gray-400 px-5 py-4 uppercase tracking-wider whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -754,6 +755,7 @@ function LeadsView({ search }) {
                   <td className="px-5 py-4 text-xs text-gray-600">{lead.phone||"—"}</td>
                   <td className="px-5 py-4 text-xs text-gray-700 whitespace-nowrap">{lead.printer||"—"}</td>
                   <td className="px-5 py-4 text-xs text-gray-500 min-w-[200px]"><span className="block whitespace-normal">{lead.issue||"—"}</span></td>
+                  <td className="px-5 py-4 text-xs font-semibold text-emerald-600">${lead.amount || "0.00"}</td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5">
                       <StatusDropdown status={lead.status} onChange={s=>updateStatus(lead.id,s)}/>
