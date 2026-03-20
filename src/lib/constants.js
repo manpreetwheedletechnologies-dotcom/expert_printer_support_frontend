@@ -3,7 +3,7 @@
 // Central config — all components import from here
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const API_BASE    = "http://localhost:5000";   // ← your Node backend port
+export const API_BASE    = "https://printerexperts.online/api";   // ← your Node backend port
 export const API_ENABLED = true;
 
 export const ROLES = { ADMIN: "admin", AGENT: "agent" };
