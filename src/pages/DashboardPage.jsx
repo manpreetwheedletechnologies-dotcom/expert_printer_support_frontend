@@ -170,7 +170,7 @@ function LoginPage({ onLogin }) {
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-3 mb-10">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="logo"
               className="h-16 lg:h-20 w-auto object-contain"
             />
@@ -441,7 +441,7 @@ function DashboardPage({ user, onLogout }) {
       <aside className="w-56 bg-white border-r border-gray-100 flex flex-col py-5 px-3 shrink-0">
         <div className="flex items-center gap-2.5 px-3 mb-8">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="logo"
               className="h-16 lg:h-20 w-auto object-contain"
             />

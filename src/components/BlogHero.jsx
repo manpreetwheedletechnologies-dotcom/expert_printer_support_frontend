@@ -47,7 +47,7 @@ export default BlogHero;
 //         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
 //         style={{
 //           backgroundImage:
-//             'url("/bloghero.png")',
+//             'url("/bloghero.webp")',
 //           opacity: 1,
 //         }}
 //       />

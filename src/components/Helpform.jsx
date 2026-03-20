@@ -109,7 +109,7 @@ const Helpform = () => {
         {/* LEFT IMAGE */}
         <div className="w-full lg:w-[380px] h-[240px] lg:h-auto lg:self-stretch shrink-0">
           <img
-            src="/help.png"
+            src="/help.webp"
             alt="Printer Support"
             className="w-full h-full object-cover rounded-[20px]"
           />

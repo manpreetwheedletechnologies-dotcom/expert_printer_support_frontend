@@ -12,7 +12,7 @@ function SupportPage() {
         <>
     <Header/>
     <Hero_hp title="Instant Device Setup & Connectivity Assistance. " subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-     eiusmod tempor incididunt ut labore et dolore magna aliqua." themeImage="/printer_su.png"/>
+     eiusmod tempor incididunt ut labore et dolore magna aliqua." themeImage="/printer_su.webp"/>
     <Helpform/>
     <ServicesSection colorClass="bg-[#007DBA0D]"/>
     <Testimonials/>

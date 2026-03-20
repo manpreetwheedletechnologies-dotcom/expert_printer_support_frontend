@@ -121,7 +121,7 @@ const location = useLocation();
           {/* ── Logo ── */}
           <Link to="/" className="flex items-center flex-shrink-0">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="logo"
               className="h-16 lg:h-20 w-auto object-contain"
             />

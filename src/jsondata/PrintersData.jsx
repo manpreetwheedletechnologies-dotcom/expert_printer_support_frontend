@@ -2,62 +2,62 @@
 const PrintersData = [
   {
     name: "Brother",
-    logo: "/b1.png",
+    logo: "/b1.webp",
     link: "https://www.brother-usa.com/support"
   },
   {
     name: "Panasonic",
-    logo: "/b2.png",
+    logo: "/b2.webp",
     link: "https://na.panasonic.com/us/support"
   },
   {
     name: "Konica Minolta",
-    logo: "/b3.png",
+    logo: "/b3.webp",
     link: "https://www.konicaminolta.us/"
   },
   {
     name: "Tally",
-    logo: "/b4.png",
+    logo: "/b4.webp",
     link: "https://www.tallygenicom.com/"
   },
   {
     name: "Xerox",
-    logo: "/b5.png",
+    logo: "/b5.webp",
     link: "https://www.xerox.com/en-us"
   },
   {
     name: "Canon",
-    logo: "/b6.png",
+    logo: "/b6.webp",
     link: "https://www.usa.canon.com/shop/printers"
   },
   {
     name: "Epson",
-    logo: "/b7.png",
+    logo: "/b7.webp",
     link: "https://epson.com/support"
   },
   {
     name: "Fujitsu",
-    logo: "/b8.png",
+    logo: "/b8.webp",
     link: "https://www.fujitsu.com/us/support/"
   },
   {
     name: "Kyocera",
-    logo: "/b9.png",
+    logo: "/b9.webp",
     link: "https://www.kyoceradocumentsolutions.us/en/products/printers.html"
   },
   {
     name: "Samsung",
-    logo: "/b10.png",
+    logo: "/b10.webp",
     link: "https://www.hp.com/us-en/shop/sitesearch?keyword=Samsung"
   },
   {
     name: "Ricoh",
-    logo: "/b12.png",
+    logo: "/b12.webp",
     link: "https://www.ricoh-usa.com/en/products/office-printing"
   },
   {
     name: "HP",
-    logo: "/b13.png",
+    logo: "/b13.webp",
     link: "https://www.hp.com/us-en/shop"
   }
 ];

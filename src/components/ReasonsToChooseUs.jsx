@@ -12,7 +12,7 @@ const ReasonsToChooseUs = () => {
         {/* Left Image */}
         <div className="w-full overflow-hidden rounded-3xl h-full min-h-[300px] max-h-[700px]">
           <img
-            src="/reason.png"
+            src="/reason.webp"
             alt="Printer Support"
             loading="lazy"
             className="w-full h-full object-cover hover:scale-110 transition"

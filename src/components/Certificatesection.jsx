@@ -39,7 +39,7 @@ export default function CertificateSection() {
             style={{ width: 200, height: 200 }}
           >
             <img
-              src="/certification.png"
+              src="/certification.webp"
               alt="CompTIA A+ Certification"
               loading="lazy"
               className={`transition-all duration-700 ease-out delay-300

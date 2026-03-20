@@ -36,7 +36,7 @@ export default function DashboardLayout({
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-3 mb-8">
                      <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="logo"
               className="h-16 lg:h-20 w-auto object-contain"
             />

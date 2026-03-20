@@ -44,7 +44,7 @@ function Footer({colorClass}) {
           {/* TOP ROW */}
           <div className="flex flex-col items-center text-center gap-5 sm:flex-row sm:items-start sm:justify-between sm:text-left">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="logo"
               className="h-18 lg:h-20 w-auto object-contain"
             />

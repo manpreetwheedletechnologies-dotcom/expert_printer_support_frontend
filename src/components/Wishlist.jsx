@@ -7,7 +7,7 @@ import {
 } from "../lib/wishlist";
 
 const PLACEHOLDER_IMG =
-  "https://images-cdn.ubuy.co.in/67cdb26d5af3ca779640523e-hp-officejet-3830-all-in-one-printer.jpg";
+  "https://images-cdn.ubuy.co.in/67cdb26d5af3ca779640523e-hp-officejet-3830-all-in-one-printer.webp";
 
 function WishlistDrawer({ open, onClose }) {
   const [items, setItems] = useState(getWishlist());

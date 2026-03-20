@@ -1,49 +1,31 @@
 import { useEffect, useState, useRef } from "react";
 
-// ─── COMPLETE list of every image used in the project ────────────────────────
-// Add any new images here so they get preloaded too
-const ALL_IMAGES = [
-  // Core UI
-  "/logo.png",
+// ─── CRITICAL UI elements only (Blocking) ───────────────────────────
+const CRITICAL_ASSETS = [
+  "/logo.webp",
   "/Vector.svg",
   "/atlas_icon.svg",
   "/bot_text.svg",
-  // Hero / backgrounds
-  "/home_bg.png",
-  // About / sections
-  "/aboutus.png",
-  "/reason.png",
-  "/certification.png",
-  // Printer issue icons
-  "/ink.png",
-  "/memory.png",
-  "/trouble.png",
-  "/printer_.png",
-  // Service icons (SVG)
-  "/call_svg.svg",
-  "/cust_svg.svg",
-  "/done_svg.svg",
-  "/headfn_svg.svg",
-  "/money_svg.svg",
-  "/printer_svg.svg",
-  "/rating_svg.svg",
-  "/success_svg.svg",
-  // Services section
-  "/onsite.png",
-  // Contact / Help forms
-  "/contact.png",
-  "/help.png",
-  // Testimonials
-  "/user1.png",
-  "/user2.png",
-  "/user3.png",
-  // Blog images
-  "/b1.png", "/b2.png", "/b3.png", "/b4.png", "/b5.png",
-  "/b6.png", "/b7.png", "/b8.png", "/b9.png", "/b10.png",
-  "/b12.png", "/b13.png",
-  "/blogstep1.png", "/blogstep2.png", "/blogstep3.png",
-  "/blogstep4.png", "/blogstep5.png", "/blogstep6.png",
 ];
+
+// ─── Background assets (Non-blocking) ───────────────────────────────
+const LAZY_ASSETS = [
+  "/home_bg.webp",
+  "/aboutus.webp",
+  "/reason.webp",
+  "/certification.webp",
+  "/ink.webp",
+  "/memory.webp",
+  "/trouble.webp",
+  "/printer_.webp",
+  "/onsite.webp",
+  "/contact.webp",
+  "/help.webp",
+  "/user1.webp",
+  "/user2.webp",
+  "/user3.webp",
+];
+
 
 // Only keyframes & named animation classes — everything else is Tailwind
 const keyframes = `
@@ -127,7 +109,7 @@ export default function Preloader({ onComplete, label = "Loading" }) {
     }
     setMounted(true);
 
-    const total = ALL_IMAGES.length;
+    const total = CRITICAL_ASSETS.length;
     let loaded = 0;
 
     const done = () => {
@@ -143,21 +125,27 @@ export default function Preloader({ onComplete, label = "Loading" }) {
       loaded++;
       const pct = Math.min(Math.round((loaded / total) * 100), 99);
       setProgress(pct);
-      setStatus(`Loading assets... ${loaded} / ${total}`);
+      setStatus(`Waking up system... ${loaded} / ${total}`);
       if (loaded >= total) done();
     };
 
-    // Start all image loads in parallel
-    setStatus(`Loading assets... 0 / ${total}`);
-    ALL_IMAGES.forEach((src) => {
+    // ─── PART 1: Block on Critical Assets
+    CRITICAL_ASSETS.forEach((src) => {
       const img = new Image();
       img.onload  = onLoad;
-      img.onerror = onLoad; // count failures too — don't block
+      img.onerror = onLoad;
       img.src     = src;
     });
 
-    // Hard safety cap — never show preloader more than 6 seconds
-    const cap = setTimeout(done, 6000);
+    // ─── PART 2: Non-blocking background load for large images
+    LAZY_ASSETS.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    // Hard safety cap — maximum 3 seconds
+    const cap = setTimeout(done, 3000);
+
     return () => clearTimeout(cap);
   }, []);
 

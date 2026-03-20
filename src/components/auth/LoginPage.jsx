@@ -90,7 +90,7 @@ export default function LoginPage({ onLogin }) {
 
         <div className="flex items-center justify-center mb-10">
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt="Logo"
             className="h-16 lg:h-20 w-auto object-contain"
           />

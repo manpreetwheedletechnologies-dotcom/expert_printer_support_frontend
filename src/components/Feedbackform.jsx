@@ -53,7 +53,7 @@ const Feedbackform = () => {
         {/* LEFT IMAGE */}
         <div className="w-full lg:w-[360px] h-[260px] lg:h-auto shrink-0">
           <img
-            src="/public/help.png"
+            src="/public/help.webp"
             alt="Feedback"
             className="w-full h-full object-cover"
           />

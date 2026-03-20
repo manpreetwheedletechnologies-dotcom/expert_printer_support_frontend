@@ -5,7 +5,7 @@ const blogs = [
   {
     id: 1,
     slug: "fix",
-    image: "/memory.png",
+    image: "/memory.webp",
     date: "July 3, 2025",
     title: "How to Fix Printer “Memory Full” Error on Windows 10",
     description:
@@ -14,7 +14,7 @@ const blogs = [
   {
     id: 2,
     slug: "troubleshooting",
-    image: "/trouble.png",
+    image: "/trouble.webp",
     date: "July 1, 2025",
     title: "Troubleshooting Printer Connection Drops",
     description:
@@ -23,7 +23,7 @@ const blogs = [
   {
     id: 3,
     slug: "blackink",
-    image: "/ink.png",
+    image: "/ink.webp",
     date: "June 29, 2025",
     title: "Printer Not Printing Black Ink After Cartridge?",
     description:

@@ -32,7 +32,7 @@ const Hero_hp = ({ themeImage, title, subtitle }) => {
           {/* ── RIGHT: Image ── */}
           <div className="w-full flex justify-center lg:justify-end w-full h-full bg-cover">
             <img
-              src="/printer_.png"
+              src="/printer_.webp"
               alt="Printer"
               loading="lazy"
               className="h-40 sm:h-48 md:h-60 lg:h-60 w-auto object-contain"

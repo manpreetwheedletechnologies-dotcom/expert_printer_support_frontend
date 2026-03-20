@@ -255,32 +255,32 @@ export default BlogSteps;
 //   {
 //     step: "Step 1",
 //     text: "To fix printer connection problems, first turn the printer off. Simply press the power button once.",
-//     image: "/blogstep1.png",
+//     image: "/blogstep1.webp",
 //   },
 //   {
 //     step: "Step 2",
 //     text: "After turning off the printer, pull out the power cable from the back of the printer.",
-//     image: "/blogstep2.png",
+//     image: "/blogstep2.webp",
 //   },
 //   {
 //     step: "Step 3",
 //     text: "Printer network troubleshooting will only be successful if you reset the router. Take the power plug out from the wireless router.",
-//     image: "/blogstep3.png",
+//     image: "/blogstep3.webp",
 //   },
 //   {
 //     step: "Step 4",
 //     text: "After waiting for 5 to 10 minutes, put the power cable back into the router to fix the printer connectivity issue.",
-//     image: "/blogstep4.png",
+//     image: "/blogstep4.webp",
 //   },
 //   {
 //     step: "Step 5",
 //     text: "When the router is turned on, put the power supply cable back into the printer.",
-//     image: "/blogstep5.png",
+//     image: "/blogstep5.webp",
 //   },
 //   {
 //     step: "Step 6",
 //     text: "Finally, turn the printer back on and try reconnecting it to the wireless network.",
-//     image: "/blogstep6.png",
+//     image: "/blogstep6.webp",
 //   },
 // ];
 

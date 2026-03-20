@@ -4,7 +4,7 @@ const TestimonialsData = [
     id: 1,
     name: "Bessie Cooper",
     role: "IT Manager, BrightWave Solutions",
-    image: "/user1.png",
+    image: "/user1.webp",
     message:
       "My printer stopped working out of nowhere, and I needed it fixed fast. I contacted their AI Support Assistant and had it running in no time.",
   },
@@ -12,7 +12,7 @@ const TestimonialsData = [
     id: 2,
     name: "Ralph Edwards",
     role: "IT Manager, BrightWave Solutions",
-    image: "/user2.png",
+    image: "/user2.webp",
     message:
       "I thought I’d need a new printer, but their AI Help desk fixed the problem quickly. Super convenient and very easy to communicate.",
   },
@@ -20,7 +20,7 @@ const TestimonialsData = [
     id: 3,
     name: "Kathryn Murphy",
     role: "IT Manager, BrightWave Solutions",
-    image: "/user3.png",
+    image: "/user3.webp",
     message:
       "I contacted them late in the evening and was surprised by how quickly they responded. My printer was fixed the same day.",
   },

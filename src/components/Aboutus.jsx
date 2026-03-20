@@ -96,7 +96,7 @@ function Aboutus() {
 
                     <div className="w-full overflow-hidden rounded-3xl h-full max-h-[550px]">
                         <img
-                            src="/aboutus.png"
+                            src="/aboutus.webp"
                             alt="Printer Support"
                             loading="lazy"
                             className="w-full h-full object-cover hover:scale-110 transition"

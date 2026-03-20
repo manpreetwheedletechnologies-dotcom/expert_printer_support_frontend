@@ -5,25 +5,25 @@ const services = [
     {
         title: "On Site Repair",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.",
-        image: "/onsite.png",
+        image: "/onsite.webp",
         showPin: true,
     },
     {
         title: "Printer Setup & Connectivity",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.",
-        image: "printer_setup.png",
+        image: "printer_setup.webp",
         showPin: false,
     },
     {
         title: "System Speed & Health",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.",
-        image: "system_speed.png",
+        image: "system_speed.webp",
         showPin: false,
     },
     {
         title: "Security & Antivirus",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do.",
-        image: "/s&a.png",
+        image: "/s&a.webp",
         showPin: false,
     },
 ];

@@ -97,7 +97,7 @@ const ContactPage = ({ onClose }) => {
         {/* LEFT IMAGE */}
         <div className="w-full lg:w-[400px] h-[260px] lg:h-auto lg:self-stretch">
           <motion.img
-            src="/contact.png"
+            src="/contact.webp"
             alt="Printer Support"
             className="w-full h-full object-cover rounded-[24px]"
             initial={{ opacity: 0, scale: 0.9 }}

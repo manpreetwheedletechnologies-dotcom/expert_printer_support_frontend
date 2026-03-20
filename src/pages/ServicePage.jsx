@@ -7,7 +7,7 @@ function ServicePage() {
   return (
    <>
    <Header/>
-   <Hero_hp themeImage="/printer_ser.png" title="Guard Your Digital Life." subtitle="Authorized Antivirus Installation , Identity Protection , Malware Prevention "/>
+   <Hero_hp themeImage="/printer_ser.webp" title="Guard Your Digital Life." subtitle="Authorized Antivirus Installation , Identity Protection , Malware Prevention "/>
    <ServicesSection/>
    <Footer/>
    </>
