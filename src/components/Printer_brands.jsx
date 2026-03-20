@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"; 
+import { useState, useEffect } from "react";
 import { API_BASE } from "../lib/constants";
 
 // ─── Placeholder Image ───────────────────────────────────────────────
@@ -9,14 +9,68 @@ const PLACEHOLDER_IMG =
 // WISHLIST HELPERS
 // =============================================================================
 
-import {
-  getWishlist,
-  saveWishlist,
-  isInWishlist,
-  addToWishlist,
-  removeFromWishlist,
-  updateWishlistQty,
-} from "../lib/wishlist";
+export const getWishlist = () =>
+  JSON.parse(localStorage.getItem("wishlist") || "[]");
+
+export const saveWishlist = (items) => {
+  localStorage.setItem("wishlist", JSON.stringify(items));
+  window.dispatchEvent(new Event("storage"));
+};
+
+export const isInWishlist = (id) =>
+  getWishlist().some((item) => item.id === id);
+
+export const addToWishlist = (product) => {
+  const current = getWishlist();
+  if (!current.find((item) => item.id === product.id)) {
+    saveWishlist([
+      ...current,
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        original_price: product.original_price,
+        image: product.image,
+        url: product.url,
+        quantity: 1,
+      },
+    ]);
+  }
+};
+
+export const removeFromWishlist = (id) =>
+  saveWishlist(getWishlist().filter((item) => item.id !== id));
+
+export const updateWishlistQty = (id, qty) => {
+  if (qty <= 0) {
+    removeFromWishlist(id);
+    return;
+  }
+  saveWishlist(
+    getWishlist().map((item) =>
+      item.id === id ? { ...item, quantity: qty } : item
+    )
+  );
+};
+
+export const getWishlistTotalQty = () =>
+  getWishlist().reduce((sum, item) => sum + (item.quantity || 1), 0);
+
+// =============================================================================
+// HOOK
+// =============================================================================
+
+export function useWishlistCount() {
+  const [count, setCount] = useState(getWishlistTotalQty);
+
+  useEffect(() => {
+    const sync = () => setCount(getWishlistTotalQty());
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
+
+  return count;
+}
 
 // =============================================================================
 // CARD
@@ -26,7 +80,6 @@ function PrinterCard({ product }) {
   const [inWishlist, setInWishlist] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  // Sync card state with localStorage on mount + on any storage change
   useEffect(() => {
     const sync = () => {
       const inList = isInWishlist(product.id);
@@ -70,87 +123,80 @@ function PrinterCard({ product }) {
   return (
     <div
       className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden"
-      style={{ transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease' }
-      }
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-6px)';
-        e.currentTarget.style.boxShadow = '0 20px 40px rgba(53, 62, 71, 0.2)';
-        e.currentTarget.querySelector('img').style.transform = 'scale(1.06)';
+      style={{ transition: "transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-6px)";
+        e.currentTarget.style.boxShadow = "0 20px 40px rgba(53, 62, 71, 0.2)";
+        e.currentTarget.querySelector("img").style.transform = "scale(1.06)";
       }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '';
-        e.currentTarget.style.borderColor = '';
-        e.currentTarget.querySelector('img').style.transform = 'scale(1)';
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "";
+        e.currentTarget.style.borderColor = "";
+        e.currentTarget.querySelector("img").style.transform = "scale(1)";
       }}
     >
-
       {/* Image */}
-      < div className="bg-[#f7f7f7] flex items-center justify-center px-6 py-5 h-70 overflow-hidden" >
+      <div className="bg-[#f7f7f7] flex items-center justify-center px-6 py-5 h-70 overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
-          loading="lazy"
           className="h-full w-full object-cover"
-          style={{ transition: 'transform 0.35s ease' }}
+          style={{ transition: "transform 0.35s ease" }}
           onError={(e) => { e.target.src = PLACEHOLDER_IMG; }}
         />
       </div>
 
       {/* Body */}
-      <div className="flex flex-col flex-1 px-4 pt-4 pb-5 gap-3" >
+      <div className="flex flex-col flex-1 px-4 pt-4 pb-5 gap-3">
 
         {/* Name */}
-        < p className="text-[13.5px] font-semibold text-gray-800 leading-snug line-clamp-4" >
+        <p className="text-[13.5px] font-semibold text-gray-800 leading-snug line-clamp-4">
           {product.name}
         </p>
 
         {/* Price */}
-        <div className="flex items-center gap-2 mt-auto" >
-          <span className="text-[#5695D0] font-bold text-[15px]" >
+        <div className="flex items-center gap-2 mt-auto">
+          <span className="text-[#5695D0] font-bold text-[15px]">
             ${product.price.toFixed(2)}
           </span>
-          {
-            product.original_price > product.price && (
-              <span className="text-gray-400 text-[13px] line-through" >
-                ${product.original_price.toFixed(2)}
-              </span>
-            )
-          }
+          {product.original_price > product.price && (
+            <span className="text-gray-400 text-[13px] line-through">
+              ${product.original_price.toFixed(2)}
+            </span>
+          )}
         </div>
 
-        {/* Wishlist Button  OR  Quantity Selector */}
-        {
-          !inWishlist ? (
-            <button
+        {/* Wishlist Button OR Quantity Selector */}
+        {!inWishlist ? (
+          <button
             style={{ backgroundColor: "var(--bg-color)" }}
-              onClick={handleAdd}
-              className="w-full h-12 rounded-lg hover:opacity-90 text-white text-sm font-medium transition-colors duration-200 cursor-pointer "
+            onClick={handleAdd}
+            className="w-full h-12 rounded-lg hover:opacity-90 text-white text-sm font-medium transition-colors duration-200 cursor-pointer"
+          >
+            Add to Wishlist
+          </button>
+        ) : (
+          <div className="flex items-center gap-2 w-full">
+            <button
+              style={{ backgroundColor: "var(--bg-color)" }}
+              onClick={handleDecrease}
+              className="flex-[0.8] h-11 rounded-lg hover:opacity-90 text-white text-xl font-bold flex items-center justify-center transition-colors duration-200 cursor-pointer"
             >
-              Add to Wishlist
+              −
             </button>
-          ) : (
-            <div className="flex items-center gap-2 w-full" >
-              <button
-              style={{ backgroundColor: "var(--bg-color)" }}
-                onClick={handleDecrease}
-                className="flex-[0.8] h-11 rounded-lg hover:opacity-90 text-white text-xl font-bold flex items-center justify-center transition-colors duration-200 cursor-pointer"
-              >
-                −
-              </button>
-              < div className="flex-1 h-11 flex items-center justify-center text-sm font-semibold text-gray-800 border border-gray-200 rounded-lg bg-white select-none" >
-                {String(quantity).padStart(2, "0")}
-              </div>
-              < button
-              style={{ backgroundColor: "var(--bg-color)" }}
-                onClick={handleIncrease}
-                className="flex-[0.8] h-11 hover:opacity-90 rounded-lg text-white text-xl font-bold flex items-center justify-center transition-colors duration-200 cursor-pointer"
-              >
-                +
-              </button>
+            <div className="flex-1 h-11 flex items-center justify-center text-sm font-semibold text-gray-800 border border-gray-200 rounded-lg bg-white select-none">
+              {String(quantity).padStart(2, "0")}
             </div>
-          )
-        }
+            <button
+              style={{ backgroundColor: "var(--bg-color)" }}
+              onClick={handleIncrease}
+              className="flex-[0.8] h-11 hover:opacity-90 rounded-lg text-white text-xl font-bold flex items-center justify-center transition-colors duration-200 cursor-pointer"
+            >
+              +
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -164,46 +210,30 @@ export default function PrinterListing() {
   const [printers, setPrinters] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ FETCH API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE}/api/scrape/hp-printers`
-        );
-        const data = await res.json();
+        const res = await fetch(`${API_BASE}/api/scrape/hp-printers`);
+        const json = await res.json();
 
-        if (data.success) {
-          const formatted = data.data.map((item, i) => {
-            // Clean price: remove non-numeric chars like ₹ or commas
-            const rawPrice = item.price ? String(item.price).replace(/[^\d.]/g, '') : "0";
-            const numPrice = parseFloat(rawPrice) || 0;
+        // ✅ FIX: API returns { success, data: { success, count, data: [...] } }
+        // so we unwrap json.data.data to get the actual printer array
+        const list =
+          Array.isArray(json?.data?.data)   ? json.data.data   // nested: { data: { data: [...] } }
+          : Array.isArray(json?.data)        ? json.data        // flat:   { data: [...] }
+          : [];
 
-            const rawOrig = item.original_price ? String(item.original_price).replace(/[^\d.]/g, '') : rawPrice;
-            const numOrig = parseFloat(rawOrig) || numPrice;
+        const formatted = list.map((item, i) => ({
+          id: item.id ?? `hp-${i}`,
+          name: item.name,
+          price: Number(item.price) || 0,
+          original_price: Number(item.original_price) || Number(item.price) || 0,
+          image: item.image || PLACEHOLDER_IMG,
+          url: item.url || "#",
+          in_stock: item.in_stock ?? true,
+        }));
 
-            // Transform URL: Redirect Indian HP store to US HP store
-            let url = item.url || "#";
-            if (url.includes("hp.com/in-en")) {
-              url = url.replace("hp.com/in-en", "hp.com/us-en");
-            } else if (url.includes(".in")) {
-                // Generic catch for other .in domains if they appear
-                url = url.replace(".in", ".com");
-            }
-
-            return {
-              id: item.id || i,
-              name: item.name,
-              price: numPrice,
-              original_price: numOrig,
-              image: item.image || PLACEHOLDER_IMG,
-              url: url,
-              in_stock: true,
-            };
-          });
-
-          setPrinters(formatted);
-        }
+        setPrinters(formatted);
       } catch (err) {
         console.error("API Error:", err);
       } finally {
@@ -214,7 +244,6 @@ export default function PrinterListing() {
     fetchData();
   }, []);
 
-  // ⏳ Loading
   if (loading) {
     return (
       <div className="text-center py-20 text-lg font-semibold">
@@ -226,17 +255,14 @@ export default function PrinterListing() {
   return (
     <section className="py-14 px-4">
       <div className="max-w-7xl mx-auto">
-
         <h2 className="text-3xl font-bold text-center mb-10">
           Pick Your Printer
         </h2>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {printers.map((printer) => (
             <PrinterCard key={printer.id} product={printer} />
           ))}
         </div>
-
       </div>
     </section>
   );
