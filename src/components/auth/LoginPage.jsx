@@ -88,17 +88,12 @@ export default function LoginPage({ onLogin }) {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
 
-        {/* Logo */}
         <div className="flex items-center justify-center mb-10">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-200">
-              <Icon name="phone" cls="w-5 h-5 text-white"/>
-            </div>
-            <div>
-              <span className="block text-lg font-bold text-gray-900 leading-tight">Printer</span>
-              <span className="block text-lg font-bold text-blue-500 leading-tight -mt-1">Support</span>
-            </div>
-          </div>
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-16 lg:h-20 w-auto object-contain"
+          />
         </div>
 
         {/* Card */}

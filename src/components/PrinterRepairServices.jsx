@@ -9,12 +9,14 @@ export default function PrinterRepairServices() {
         <img
           src={item.bgIcon}
           alt="bg"
+          loading="lazy"
           className="w-full h-full object-contain"
         />
 
         <img
           src={item.icon}
           alt={item.title}
+          loading="lazy"
           className="absolute inset-0 m-auto w-6 h-6 sm:w-8 sm:h-8 object-contain"
         />
       </div>
@@ -22,6 +24,7 @@ export default function PrinterRepairServices() {
       <img
         src={item.icon}
         alt={item.title}
+        loading="lazy"
         className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
       />
     ),

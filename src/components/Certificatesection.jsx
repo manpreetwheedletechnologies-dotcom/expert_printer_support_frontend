@@ -41,6 +41,7 @@ export default function CertificateSection() {
             <img
               src="/certification.png"
               alt="CompTIA A+ Certification"
+              loading="lazy"
               className={`transition-all duration-700 ease-out delay-300
                 ${visible ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 rotate-180"}`}
               style={{ width: 150, height: 150, objectFit: "contain" }}

@@ -85,6 +85,7 @@ const RecentBlogs = () => {
               <img
                 src={blog.image}
                 alt={blog.title}
+                loading="lazy"
                 className="h-56 w-full object-cover"
               />
               <div className="p-6 flex flex-col flex-1">
@@ -139,6 +140,7 @@ const RecentBlogs = () => {
             <img
               src={blogsData[activeBlogSlug].hero.backgroundImage}
               alt={blogsData[activeBlogSlug].hero.title}
+              loading="lazy"
               className="w-full h-48 md:h-56 object-cover rounded-xl mb-4"
             />
             <span className="text-sm text-blue-600 font-medium">
@@ -156,6 +158,7 @@ const RecentBlogs = () => {
                   <img
                     src={step.image}
                     alt={step.step}
+                    loading="lazy"
                     className="w-full md:w-32 rounded-xl object-cover shadow"
                   />
                   <div>

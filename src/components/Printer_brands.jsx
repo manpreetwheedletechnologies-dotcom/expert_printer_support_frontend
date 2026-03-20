@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; 
 import { API_BASE } from "../lib/constants";
 
 // ─── Placeholder Image ───────────────────────────────────────────────
@@ -9,69 +9,14 @@ const PLACEHOLDER_IMG =
 // WISHLIST HELPERS
 // =============================================================================
 
-export const getWishlist = () =>
-  JSON.parse(localStorage.getItem("wishlist") || "[]");
-
-export const saveWishlist = (items) => {
-  localStorage.setItem("wishlist", JSON.stringify(items));
-  window.dispatchEvent(new Event("storage"));
-};
-
-export const isInWishlist = (id) =>
-  getWishlist().some((item) => item.id === id);
-
-export const addToWishlist = (product) => {
-  const current = getWishlist();
-
-  if (!current.find((item) => item.id === product.id)) {
-    saveWishlist([
-      ...current,
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        original_price: product.original_price,
-        image: product.image,
-        url: product.url, // ✅ IMPORTANT
-        quantity: 1,
-      },
-    ]);
-  }
-};
-
-export const removeFromWishlist = (id) =>
-  saveWishlist(getWishlist().filter((item) => item.id !== id));
-
-export const updateWishlistQty = (id, qty) => {
-  if (qty <= 0) {
-    removeFromWishlist(id);
-    return;
-  }
-  saveWishlist(
-    getWishlist().map((item) =>
-      item.id === id ? { ...item, quantity: qty } : item
-    )
-  );
-};
-
-export const getWishlistTotalQty = () =>
-  getWishlist().reduce((sum, item) => sum + (item.quantity || 1), 0);
-
-// =============================================================================
-// HOOK
-// =============================================================================
-
-export function useWishlistCount() {
-  const [count, setCount] = useState(getWishlistTotalQty);
-
-  useEffect(() => {
-    const sync = () => setCount(getWishlistTotalQty());
-    window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
-  }, []);
-
-  return count;
-}
+import {
+  getWishlist,
+  saveWishlist,
+  isInWishlist,
+  addToWishlist,
+  removeFromWishlist,
+  updateWishlistQty,
+} from "../lib/wishlist";
 
 // =============================================================================
 // CARD
@@ -145,6 +90,7 @@ function PrinterCard({ product }) {
         <img
           src={product.image}
           alt={product.name}
+          loading="lazy"
           className="h-full w-full object-cover"
           style={{ transition: 'transform 0.35s ease' }}
           onError={(e) => { e.target.src = PLACEHOLDER_IMG; }}
@@ -228,16 +174,33 @@ export default function PrinterListing() {
         const data = await res.json();
 
         if (data.success) {
-          const formatted = data.data.map((item, i) => ({
-            id: item.id || i,
-            name: item.name,
-            price: Number(item.price) || 0,
-            original_price:
-            Number(item.original_price) || Number(item.price) || 0,
-            image: item.image || PLACEHOLDER_IMG,
-            url: item.url || "#", // ✅ ADD THIS
-            in_stock: true,
-          }));
+          const formatted = data.data.map((item, i) => {
+            // Clean price: remove non-numeric chars like ₹ or commas
+            const rawPrice = item.price ? String(item.price).replace(/[^\d.]/g, '') : "0";
+            const numPrice = parseFloat(rawPrice) || 0;
+
+            const rawOrig = item.original_price ? String(item.original_price).replace(/[^\d.]/g, '') : rawPrice;
+            const numOrig = parseFloat(rawOrig) || numPrice;
+
+            // Transform URL: Redirect Indian HP store to US HP store
+            let url = item.url || "#";
+            if (url.includes("hp.com/in-en")) {
+              url = url.replace("hp.com/in-en", "hp.com/us-en");
+            } else if (url.includes(".in")) {
+                // Generic catch for other .in domains if they appear
+                url = url.replace(".in", ".com");
+            }
+
+            return {
+              id: item.id || i,
+              name: item.name,
+              price: numPrice,
+              original_price: numOrig,
+              image: item.image || PLACEHOLDER_IMG,
+              url: url,
+              in_stock: true,
+            };
+          });
 
           setPrinters(formatted);
         }

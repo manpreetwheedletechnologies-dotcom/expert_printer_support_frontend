@@ -10,6 +10,7 @@ function Aboutus() {
             <img
                 src={item.icon}
                 alt={item.label}
+                loading="lazy"
                 className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
             />
         ),
@@ -97,6 +98,7 @@ function Aboutus() {
                         <img
                             src="/aboutus.png"
                             alt="Printer Support"
+                            loading="lazy"
                             className="w-full h-full object-cover hover:scale-110 transition"
                         />
                     </div>

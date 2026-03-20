@@ -65,6 +65,7 @@ const ServiceCard = ({ title, description, image, showPin }) => {
             <img
                 src={image}
                 alt={title}
+                loading="lazy"
                 className="w-full h-full object-cover"
                 style={{
                     transition: "transform 0.4s ease",

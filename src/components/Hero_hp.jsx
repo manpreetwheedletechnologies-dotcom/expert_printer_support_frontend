@@ -34,6 +34,7 @@ const Hero_hp = ({ themeImage, title, subtitle }) => {
             <img
               src="/printer_.png"
               alt="Printer"
+              loading="lazy"
               className="h-40 sm:h-48 md:h-60 lg:h-60 w-auto object-contain"
             />
           </div>

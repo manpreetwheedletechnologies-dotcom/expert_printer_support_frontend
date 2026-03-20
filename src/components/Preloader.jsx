@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 // Add any new images here so they get preloaded too
 const ALL_IMAGES = [
   // Core UI
-  "/logo.svg",
+  "/logo.png",
   "/Vector.svg",
   "/atlas_icon.svg",
   "/bot_text.svg",
@@ -31,27 +31,18 @@ const ALL_IMAGES = [
   // Services section
   "/onsite.png",
   // Contact / Help forms
-  "/public/contact.png",
-  "/public/help.png",
+  "/contact.png",
+  "/help.png",
+  // Testimonials
+  "/user1.png",
+  "/user2.png",
+  "/user3.png",
   // Blog images
-  "/b1.png",
-  "/b2.png",
-  "/b3.png",
-  "/b4.png",
-  "/b5.png",
-  "/b6.png",
-  "/b7.png",
-  "/b8.png",
-  "/b9.png",
-  "/b10.png",
-  "/b12.png",
-  "/b13.png",
-  "/blogstep1.png",
-  "/blogstep2.png",
-  "/blogstep3.png",
-  "/blogstep4.png",
-  "/blogstep5.png",
-  "/blogstep6.png",
+  "/b1.png", "/b2.png", "/b3.png", "/b4.png", "/b5.png",
+  "/b6.png", "/b7.png", "/b8.png", "/b9.png", "/b10.png",
+  "/b12.png", "/b13.png",
+  "/blogstep1.png", "/blogstep2.png", "/blogstep3.png",
+  "/blogstep4.png", "/blogstep5.png", "/blogstep6.png",
 ];
 
 // Only keyframes & named animation classes — everything else is Tailwind

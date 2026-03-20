@@ -55,6 +55,7 @@ useEffect(() => {
                 <img
                   src={item.image}
                   alt={item.name}
+                  loading="lazy"
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div>

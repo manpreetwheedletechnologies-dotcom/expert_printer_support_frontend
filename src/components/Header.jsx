@@ -4,7 +4,7 @@ import ContactPage from "./ContactPage";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
-import { useWishlistCount } from "./Printer_brands";
+import { useWishlistCount } from "../lib/wishlist";
 import WishlistDrawer from "./Wishlist";
 
 function Header() {

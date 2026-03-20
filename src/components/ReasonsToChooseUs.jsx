@@ -14,6 +14,7 @@ const ReasonsToChooseUs = () => {
           <img
             src="/reason.png"
             alt="Printer Support"
+            loading="lazy"
             className="w-full h-full object-cover hover:scale-110 transition"
           />
         </div>

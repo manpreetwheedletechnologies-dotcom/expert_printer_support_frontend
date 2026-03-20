@@ -1,4 +1,4 @@
-// src/components/dashboard/agent/AgentDashboard.jsx
+// src/components/dashboard/agent/AgentDashboard.jsx 
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
@@ -334,7 +334,7 @@ function DashboardView({ stats, leads, loading, loadingLeads, loadingRequests, i
                     <td className="px-5 py-3.5 text-xs font-medium text-gray-800 whitespace-nowrap">{lead.customer}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-500">{lead.email||"—"}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-600 whitespace-nowrap">{lead.printer||"—"}</td>
-                    <td className="px-5 py-3.5 text-xs text-gray-500 max-w-[200px]"><span className="block truncate">{lead.issue||"—"}</span></td>
+                    <td className="px-5 py-3.5 text-xs text-gray-500 min-w-[200px]"><span className="block whitespace-normal">{lead.issue||"—"}</span></td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[lead.status]||"bg-gray-100 text-gray-600"}`}>
                         {STATUS_LABEL[lead.status]||lead.status}
@@ -377,6 +377,12 @@ function LiveChatWindow({ chat, onResolve, currentUser, initialVisitorOnline = f
 
     const socket = io(API_BASE,{withCredentials:true,auth:{token:getToken()}});
     socketRef.current = socket;
+
+    // IMPORTANT: Clear previous messages when switching rooms
+    setMessages([]);
+    setConnected(false);
+    setVisitorTyping(false);
+    setChatClosed(chat?.status === "closed");
 
     socket.on("connect",()=>{
       setConnected(true);
@@ -495,7 +501,7 @@ function LiveChatWindow({ chat, onResolve, currentUser, initialVisitorOnline = f
           );
           if(m.from==="admin") return(
             <div key={m.id||idx} className="flex flex-col items-end">
-              <p className="text-xs text-purple-500 font-semibold mb-1 text-right">Admin</p>
+              <p className="text-xs text-purple-500 font-semibold mb-1 text-right">{m.senderName || "Admin"}</p>
               <div className="bg-purple-500 text-white text-sm rounded-2xl rounded-tr-sm px-4 py-3 max-w-sm leading-relaxed">{m.text}</div>
             </div>
           );
@@ -540,10 +546,9 @@ function LiveChatWindow({ chat, onResolve, currentUser, initialVisitorOnline = f
 }
 
 // ─── LIVE CHATS VIEW ──────────────────────────────────────────────────────────
-function LiveChatsView({ user, incomingRequests, onAccept, onDecline, accepting }) {
+function LiveChatsView({ user, incomingRequests, onAccept, onDecline, accepting, activeChat, setActiveChat }) {
   const currentUser  = user || getUser();
   const [chats,            setChats]           = useState([]);
-  const [activeChat,       setActiveChat]       = useState(null);
   const [loading,          setLoading]          = useState(true);
   // Map of roomId → true/false for sidebar dot indicator
   const [visitorOnlineMap, setVisitorOnlineMap] = useState({});
@@ -775,8 +780,8 @@ function LeadsView({ search }) {
                   <td className="px-5 py-4 text-xs text-gray-600">{lead.email || "—"}</td>
                   <td className="px-5 py-4 text-xs text-gray-600">{lead.phone || "—"}</td>
                   <td className="px-5 py-4 text-xs text-gray-700 whitespace-nowrap">{lead.printer || "—"}</td>
-                  <td className="px-5 py-4 text-xs text-gray-500 max-w-[160px]">
-                    <span className="block truncate">{lead.issue || "—"}</span>
+                  <td className="px-5 py-4 text-xs text-gray-500 min-w-[200px]">
+                    <span className="block whitespace-normal">{lead.issue || "—"}</span>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5">
@@ -811,6 +816,7 @@ export default function AgentDashboard({ user, onLogout }) {
   // ── Incoming requests — global, persists across all tabs ──────────────────
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [accepting,        setAccepting]        = useState(null);
+  const [activeChat,       setActiveChat]       = useState(null);
   const [loadingRequests,  setLoadingRequests]  = useState(true); // show skeleton while loading
 
   // ── Load waiting chats on every page load / refresh ───────────────────────
@@ -943,6 +949,10 @@ export default function AgentDashboard({ user, onLogout }) {
       setIncomingRequests(prev =>
         prev.map(r => r.roomId === req.roomId ? { ...r, cardStatus: "accepted" } : r)
       );
+      
+      // Auto-select the newly accepted chat
+      const normalised = normaliseChat({...req, status: "active"});
+      setActiveChat(normalised);
       setActiveNav("Live Chats");
     } catch (err) {
       console.error("Accept error:", err.message);
@@ -1019,6 +1029,8 @@ export default function AgentDashboard({ user, onLogout }) {
           onAccept={handleAccept}
           onDecline={handleDecline}
           accepting={accepting}
+          activeChat={activeChat}
+          setActiveChat={setActiveChat}
         />
       )}
       {activeNav === "Leads" && <LeadsView search={search}/>}

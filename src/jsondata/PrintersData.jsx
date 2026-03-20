@@ -3,62 +3,62 @@ const PrintersData = [
   {
     name: "Brother",
     logo: "/b1.png",
-    link: "https://www.brother.in/en/support"
+    link: "https://www.brother-usa.com/support"
   },
   {
     name: "Panasonic",
     logo: "/b2.png",
-    link: "https://industrial.panasonic.com/sa/applications/industrials/mfp"
+    link: "https://na.panasonic.com/us/support"
   },
   {
     name: "Konica Minolta",
     logo: "/b3.png",
-    link: "https://www.konicaminolta.com/in-en/index.html"
+    link: "https://www.konicaminolta.us/"
   },
   {
     name: "Tally",
     logo: "/b4.png",
-    link: "https://www.allprinters.my/products/Tally-Printers"
+    link: "https://www.tallygenicom.com/"
   },
   {
     name: "Xerox",
     logo: "/b5.png",
-    link: "https://www.xerox.com/en-in"
+    link: "https://www.xerox.com/en-us"
   },
   {
     name: "Canon",
     logo: "/b6.png",
-    link: "https://shop.in.canon/printing.html"
+    link: "https://www.usa.canon.com/shop/printers"
   },
   {
     name: "Epson",
     logo: "/b7.png",
-    link: "https://www.epson.co.in/Support/Printers/sh/s1"
+    link: "https://epson.com/support"
   },
   {
     name: "Fujitsu",
     logo: "/b8.png",
-    link: "https://global.fujitsu/en-apac/support/peripheral-printers"
+    link: "https://www.fujitsu.com/us/support/"
   },
   {
     name: "Kyocera",
     logo: "/b9.png",
-    link: "https://www.kyoceradocumentsolutions.com/in/en/products/index-bw-printer.html"
+    link: "https://www.kyoceradocumentsolutions.us/en/products/printers.html"
   },
   {
     name: "Samsung",
     logo: "/b10.png",
-    link: "https://support.hp.com/in-en/product/setup-user-guides/samsung-xpress-sl-m2620-laser-printer-series/16462823"
+    link: "https://www.hp.com/us-en/shop/sitesearch?keyword=Samsung"
   },
   {
     name: "Ricoh",
     logo: "/b12.png",
-    link: "https://www.ricoh-ap.com/products/office-printing/mfp-black-and-white"
+    link: "https://www.ricoh-usa.com/en/products/office-printing"
   },
   {
     name: "HP",
     logo: "/b13.png",
-    link: "https://www.hp.com/in-en/shop/hp-print-family"
+    link: "https://www.hp.com/us-en/shop"
   }
 ];
 

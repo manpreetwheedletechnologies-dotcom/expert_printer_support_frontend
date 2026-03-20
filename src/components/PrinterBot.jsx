@@ -66,6 +66,7 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
   const [showIntroText,  setShowIntroText]  = useState(false);
   const [liveChatId,     setLiveChatId]     = useState(null);
   const [agentConnected, setAgentConnected] = useState(false);
+  const [agentName,      setAgentName]      = useState("Support Agent");
   const [agentTyping,    setAgentTyping]    = useState(false);
   const [escalationError,setEscalationError]= useState("");
   const [chatClosed,     setChatClosed]     = useState(false);
@@ -103,7 +104,7 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
   };
   const pushUserMsg   = (text) => { conversationHistory.current.push({sender:"customer",text,created_at:new Date().toISOString()}); setMessages(prev=>[...prev,{type:"user",text}]); };
   const pushSystemMsg = (text) => setMessages(prev=>[...prev,{type:"system",text}]);
-  const pushAgentMsg  = (text) => setMessages(prev=>[...prev,{type:"agent",text}]);
+  const pushAgentMsg  = (text, name) => setMessages(prev=>[...prev,{type:"agent",text, name: name || agentName}]);
 
   // Connect visitor to Socket.IO room after chat is created
   const connectToRoom = useCallback((roomId) => {
@@ -118,26 +119,28 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
     socket.on("chat_history", (history) => {
       if (!history?.length) return;
       history.forEach(m => {
-        if (m.sender==="agent"||m.sender==="admin") pushAgentMsg(m.text);
+        if (m.sender==="agent"||m.sender==="admin") pushAgentMsg(m.text, m.senderName);
       });
     });
 
     socket.on("agent_connected", (data) => {
       setAgentConnected(true);
-      pushSystemMsg(data.message || "✅ A support agent has joined. How can we help you?");
+      if (data.name) setAgentName(data.name);
+      pushSystemMsg(data.message || `✅ ${data.name || "An agent"} has joined. How can we help you?`);
     });
 
     socket.on("user_joined", (data) => {
       if (data.message?.toLowerCase().includes("agent")) {
         setAgentConnected(true);
-        pushSystemMsg("✅ Agent has joined the chat.");
+        if (data.name) setAgentName(data.name);
+        pushSystemMsg(data.message || "✅ Agent has joined the chat.");
       }
     });
 
     // Receive agent messages in real time
     socket.on("receive_message", (msg) => {
       if (msg.sender==="agent"||msg.sender==="admin") {
-        pushAgentMsg(msg.text);
+        pushAgentMsg(msg.text, msg.senderName);
       }
     });
 
@@ -265,7 +268,9 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
             <div className="flex items-center justify-between h-[38px] flex-shrink-0">
               <div className="flex items-center gap-2">
                 <img src="/Vector.svg" alt="Atlas" className="w-[28px] h-[28px]"/>
-                <span className="text-[24px] leading-[38px] font-Inter">{step==="live"&&agentConnected?"Support":"Atlas"}</span>
+                <span className="text-[24px] leading-[38px] font-Inter">
+                  {step==="live"&&agentConnected ? agentName.split(" ")[0] : "Atlas"}
+                </span>
                 {step==="live"?(
                   <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${agentConnected?"bg-green-50 border-green-200 text-green-700":"bg-amber-50 border-amber-200 text-amber-700"}`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${agentConnected?"bg-green-500":"bg-amber-400 animate-pulse"}`}/>
@@ -285,13 +290,18 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
             </div>
 
             {/* AGENT BADGE */}
-            {step==="live"&&agentConnected&&(
-              <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}} className="mt-2 flex items-center gap-3 bg-green-50 px-3 py-2 rounded-xl border border-green-200 flex-shrink-0">
-                <div className="w-9 h-9 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">TS</div>
-                <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-green-700">Support Agent</p><p className="text-xs text-gray-500">Connected · Ready to help</p></div>
-                {liveChatId&&<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-mono flex-shrink-0">#{liveChatId.slice(-6)}</span>}
-              </motion.div>
-            )}
+              {step==="live"&&agentConnected&&(
+                <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}} className="mt-2 flex items-center gap-3 bg-green-50 px-3 py-2 rounded-xl border border-green-200 flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                    {agentName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-green-700">{agentName}</p>
+                    <p className="text-xs text-gray-500">Connected · Ready to help</p>
+                  </div>
+                  {liveChatId&&<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-mono flex-shrink-0">#{liveChatId.slice(-6)}</span>}
+                </motion.div>
+              )}
 
             {/* WAITING BADGE */}
             {step==="live"&&!agentConnected&&!chatClosed&&(
@@ -337,7 +347,7 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
                   );
                   if(msg.type==="agent") return(
                     <motion.div key={i} initial={{opacity:0,x:-20,scale:0.95}} animate={{opacity:1,x:0,scale:1}} transition={{duration:0.2}} className="flex flex-col items-start">
-                      <span className="text-xs text-green-600 font-medium mb-0.5">Support Agent</span>
+                      <span className="text-xs text-green-600 font-medium mb-0.5">{msg.name || "Support Agent"}</span>
                       <div className="max-w-[85%] px-4 py-2 rounded-xl bg-green-500 text-white text-sm leading-relaxed">{msg.text}</div>
                     </motion.div>
                   );

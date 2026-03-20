@@ -1,4 +1,4 @@
-// src/components/dashboard/admin/AdminDashboard.jsx
+// src/components/dashboard/admin/AdminDashboard.jsx 
 // ── All data comes from real MongoDB via FastAPI ──────────────────────────────
 // Stats    → GET /api/admin/stats       → { total_leads, active_chats, resolved, total_agents }
 // Leads    → GET /api/admin/leads       → { leads: [...] }
@@ -318,7 +318,7 @@ function DashboardView({ stats, areaData, barData, leads, loading, loadingLeads,
                     <td className="px-5 py-3.5 text-xs font-medium text-gray-800 whitespace-nowrap">{lead.customer}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-500">{lead.email||"—"}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-600 whitespace-nowrap">{lead.printer||"—"}</td>
-                    <td className="px-5 py-3.5 text-xs text-gray-500 max-w-[200px]"><span className="block truncate">{lead.issue||"—"}</span></td>
+                    <td className="px-5 py-3.5 text-xs text-gray-500 min-w-[200px]"><span className="block whitespace-normal">{lead.issue||"—"}</span></td>
                     <td className="px-5 py-3.5"><StatusDropdown status={lead.status} onChange={s=>onStatusChange(lead.id,s)}/></td>
                     <td className="px-5 py-3.5 text-xs text-gray-400 whitespace-pre-line">{fmtDate(lead.createdAt || lead.created_at)}</td>
                   </tr>
@@ -417,6 +417,11 @@ function AdminChatWindow({ chat, onStatusChange }) {
     const token  = localStorage.getItem("ps_token");
     const socket = io(API_BASE, { withCredentials: true, auth: token ? { token } : {} });
     socketRef.current = socket;
+
+    // IMPORTANT: Clear previous messages when switching rooms
+    setMessages([]);
+    setConnected(false);
+    setVisitorOnline(false);
 
     socket.on("connect", () => {
       setConnected(true);
@@ -557,7 +562,7 @@ function AdminChatWindow({ chat, onStatusChange }) {
           );
           if (m.from === "agent") return (
             <div key={m.id||idx} className="flex flex-col items-start">
-              <p className="text-xs text-emerald-500 font-semibold mb-1">Agent</p>
+              <p className="text-xs text-emerald-500 font-semibold mb-1">{m.senderName || "Agent"}</p>
               <div className="bg-emerald-500 text-white text-sm rounded-2xl rounded-tl-sm px-4 py-3 max-w-sm">{m.text}</div>
             </div>
           );
@@ -597,15 +602,9 @@ function AdminChatWindow({ chat, onStatusChange }) {
     </div>
   );
 }
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
 
-function LiveChatsView() {
+function LiveChatsView({ user, activeChat, setActiveChat }) {
   const [chats,    setChats]    = useState([]);
-  const [selected, setSelected] = useState(null);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState("");
   const pollingRef = useRef(null);
@@ -616,13 +615,13 @@ function LiveChatsView() {
       const list = (data.chats || []).map(normaliseChat);
       setChats(list);
       setError("");
-      if (list.length && !selected) setSelected(list[0]);
+      if (list.length && !activeChat) setActiveChat(list[0]);
     } catch (err) {
       if (err instanceof AuthError) { clearInterval(pollingRef.current); pollingRef.current = null; }
       setError("Could not load chats.");
       setChats([]);
     } finally { setLoading(false); }
-  }, []);
+  }, [activeChat, setActiveChat]);
 
   useEffect(() => {
     fetchChats();
@@ -633,7 +632,7 @@ function LiveChatsView() {
   // When admin changes chat status from the chat window — update sidebar pill + selected chat
   const handleChatStatusChange = (chatId, newStatus) => {
     setChats(prev => prev.map(c => c.id === chatId ? { ...c, status: newStatus } : c));
-    setSelected(prev => prev?.id === chatId ? { ...prev, status: newStatus } : prev);
+    setActiveChat(prev => prev?.id === chatId ? { ...prev, status: newStatus } : prev);
   };
 
   return (
@@ -654,8 +653,8 @@ function LiveChatsView() {
               : chats.length === 0
                 ? <div className="px-4 py-8 text-center text-xs text-gray-400">No chats yet</div>
                 : chats.map(c=>(
-                  <div key={c.id} onClick={()=>setSelected(c)}
-                    className={`px-4 py-3 cursor-pointer hover:bg-blue-50/50 transition-colors ${selected?.id===c.id?"bg-blue-50 border-l-2 border-blue-400":""}`}>
+                  <div key={c.id} onClick={()=>setActiveChat(c)}
+                    className={`px-4 py-3 cursor-pointer hover:bg-blue-50/50 transition-colors ${activeChat?.id===c.id?"bg-blue-50 border-l-2 border-blue-400":""}`}>
                     <div className="flex items-center justify-between mb-0.5">
                       <p className="text-xs font-semibold text-gray-800 truncate">{c.customer}</p>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${CPILL[c.status]||"bg-gray-100 text-gray-500"}`}>
@@ -671,7 +670,7 @@ function LiveChatsView() {
       </div>
 
       {/* Chat window with status control */}
-      <AdminChatWindow chat={selected} onStatusChange={handleChatStatusChange}/>
+      <AdminChatWindow chat={activeChat} onStatusChange={handleChatStatusChange} agentName={user?.name} agentConnected={true} step="live"/>
     </div>
   );
 }
@@ -728,7 +727,7 @@ function LeadsView({ search }) {
 
   if (loading) return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
-      {[1,2,3,4,5].map(i=><Skeleton key={i} cls="h-10 w-full"/>)}
+      {[1,2,3].map(i=><Skeleton key={i} cls="h-10 w-full"/>)}
     </div>
   );
 
@@ -754,7 +753,7 @@ function LeadsView({ search }) {
                   <td className="px-5 py-4 text-xs text-gray-600">{lead.email||"—"}</td>
                   <td className="px-5 py-4 text-xs text-gray-600">{lead.phone||"—"}</td>
                   <td className="px-5 py-4 text-xs text-gray-700 whitespace-nowrap">{lead.printer||"—"}</td>
-                  <td className="px-5 py-4 text-xs text-gray-500 max-w-[160px]"><span className="block truncate">{lead.issue||"—"}</span></td>
+                  <td className="px-5 py-4 text-xs text-gray-500 min-w-[200px]"><span className="block whitespace-normal">{lead.issue||"—"}</span></td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5">
                       <StatusDropdown status={lead.status} onChange={s=>updateStatus(lead.id,s)}/>
@@ -1081,6 +1080,7 @@ function AgentsView({ search, forceAdd, onAddClose }) {
 export default function AdminDashboard({ user, onLogout }) {
   const [activeNav,    setActiveNav]    = useState("Dashboard");
   const [search,       setSearch]       = useState("");
+  const [activeChat,   setActiveChat]   = useState(null);
   const [stats,        setStats]        = useState([]);
   const [areaData,     setAreaData]     = useState([]);
   const [barData,      setBarData]      = useState([]);
@@ -1158,7 +1158,7 @@ export default function AdminDashboard({ user, onLogout }) {
       headerTitle={title} headerSub={subtitle} headerRight={headerRight}
     >
       {activeNav==="Dashboard"       && <DashboardView stats={stats} areaData={areaData} barData={barData} leads={leads} loading={loadingStats} loadingLeads={loadingLeads} onStatusChange={handleStatusChange}/>}
-      {activeNav==="Live Chats"      && <LiveChatsView/>}
+      {activeNav==="Live Chats"      && <LiveChatsView user={user} activeChat={activeChat} setActiveChat={setActiveChat}/>}
       {activeNav==="Leads"           && <LeadsView search={search}/>}
       {activeNav==="Website Content" && <WebsiteContentView search={search}/>}
       {activeNav==="Agents"          && <AgentsView search={search} forceAdd={showAddAgent} onAddClose={()=>setShowAddAgent(false)}/>}
