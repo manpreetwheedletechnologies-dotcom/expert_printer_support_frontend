@@ -121,9 +121,9 @@ const location = useLocation();
           {/* ── Logo ── */}
           <Link to="/" className="flex items-center flex-shrink-0">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="logo"
-              className="h-12 lg:h-14 w-auto object-contain"
+              className="h-16 lg:h-20 w-auto object-contain"
             />
           </Link>
 

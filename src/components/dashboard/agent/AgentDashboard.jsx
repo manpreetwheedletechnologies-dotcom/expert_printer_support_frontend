@@ -260,15 +260,15 @@ function DashboardView({ stats, leads, loading, loadingLeads, loadingRequests, i
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-gray-800">Incoming Chat Requests</h3>
-            {incomingRequests.length > 0 && (
+            {incomingRequests.filter(r => r.cardStatus === "pending").length > 0 && (
               <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
-                {incomingRequests.length}
+                {incomingRequests.filter(r => r.cardStatus === "pending").length}
               </span>
             )}
           </div>
-          {!loadingRequests && incomingRequests.filter(r=>r.cardStatus==="pending").length > 0 && (
+          {!loadingRequests && incomingRequests.filter(r => r.cardStatus === "pending").length > 0 && (
             <span className="text-xs text-amber-600 font-medium bg-amber-50 px-3 py-1 rounded-full border border-amber-200 animate-pulse">
-              ● {incomingRequests.filter(r=>r.cardStatus==="pending").length} waiting for agent
+              ● {incomingRequests.filter(r => r.cardStatus === "pending").length} waiting for agent
             </span>
           )}
         </div>
@@ -352,16 +352,22 @@ function DashboardView({ stats, leads, loading, loadingLeads, loadingRequests, i
 }
 
 // ─── LIVE CHAT WINDOW ─────────────────────────────────────────────────────────
-function LiveChatWindow({ chat, onResolve, currentUser }) {
+function LiveChatWindow({ chat, onResolve, currentUser, initialVisitorOnline = false, onVisitorStatusChange }) {
   const [messages,       setMessages]       = useState([]);
   const [input,          setInput]          = useState("");
   const [connected,      setConnected]      = useState(false);
   const [visitorTyping,  setVisitorTyping]  = useState(false);
+  const [visitorOnline,  setVisitorOnline]  = useState(initialVisitorOnline);
   const [adminInChat,    setAdminInChat]    = useState(false);
   const [adminRequested, setAdminRequested] = useState(false);
   const [chatClosed,     setChatClosed]     = useState(chat?.status==="closed");
   const bottomRef      = useRef(null);
   const socketRef      = useRef(null);
+
+  // Sync visitorOnline when switching between chats
+  useEffect(() => {
+    setVisitorOnline(initialVisitorOnline);
+  }, [chat?.roomId, initialVisitorOnline]);
 
   useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:"smooth"}); },[messages,visitorTyping]);
 
@@ -388,7 +394,21 @@ function LiveChatWindow({ chat, onResolve, currentUser }) {
     socket.on("typing_indicator",({sender,isTyping})=>{ if(sender==="visitor") setVisitorTyping(isTyping); });
     socket.on("admin_joined",(d)=>{ setAdminInChat(true); setAdminRequested(false); setMessages(prev=>[...prev,{id:Date.now(),from:"system",text:d.message||"Admin has joined."}]); });
     socket.on("admin_declined",(d)=>{ setAdminRequested(false); setMessages(prev=>[...prev,{id:Date.now(),from:"system",text:d.message||"Admin unavailable."}]); });
-    socket.on("chat_closed",()=>{ setChatClosed(true); setMessages(prev=>[...prev,{id:Date.now(),from:"system",text:"Chat closed."}]); });
+    socket.on("chat_closed",()=>{ setChatClosed(true); setVisitorOnline(false); setMessages(prev=>[...prev,{id:Date.now(),from:"system",text:"Chat closed."}]); });
+    socket.on("visitor_disconnected",()=>{ setChatClosed(true); setVisitorOnline(false); setMessages(prev=>[...prev,{id:Date.now(),from:"system",text:"Visitor has left the chat."}]); });
+
+    // Real-time visitor online/offline — updates chat header AND sidebar dot
+    socket.on("visitor_status",({roomId, online})=>{
+      if (roomId !== chat.roomId) return;
+      setVisitorOnline(online);
+      // Propagate to LiveChatsView so sidebar dot updates too
+      onVisitorStatusChange?.(roomId, online);
+      if (!online) {
+        setMessages(prev=>[...prev,{id:Date.now(),from:"system",text:"Visitor went offline."}]);
+      } else {
+        setMessages(prev=>[...prev,{id:Date.now(),from:"system",text:"Visitor is back online."}]);
+      }
+    });
 
     return ()=>{ socket.disconnect(); socketRef.current=null; };
   },[chat?.roomId]);
@@ -425,10 +445,17 @@ function LiveChatWindow({ chat, onResolve, currentUser }) {
     <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <p className="text-base font-bold text-gray-900">{chat.customer}</p>
-            <span className={`w-2 h-2 rounded-full ${connected?"bg-emerald-400":"bg-gray-300"}`}/>
-            <span className="text-xs text-gray-400">{connected?"Live":"Offline"}</span>
+            {/* Visitor online/offline badge only — no redundant Live dot */}
+            <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${
+              visitorOnline
+                ? "bg-blue-50 text-blue-700 border-blue-200"
+                : "bg-gray-100 text-gray-400 border-gray-200"
+            }`}>
+              {/* <span className={`w-1.5 h-1.5 rounded-full ${visitorOnline?"bg-blue-500 animate-pulse":"bg-gray-400"}`}/>
+              {visitorOnline ? "Visitor Online" : "Visitor Offline"} */}
+            </span>
             {adminInChat&&<span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">Admin In Chat</span>}
           </div>
           <p className="text-xs text-gray-400 mt-0.5">{chat.printer||"—"} · {chat.email||"—"}</p>
@@ -515,10 +542,13 @@ function LiveChatWindow({ chat, onResolve, currentUser }) {
 // ─── LIVE CHATS VIEW ──────────────────────────────────────────────────────────
 function LiveChatsView({ user, incomingRequests, onAccept, onDecline, accepting }) {
   const currentUser  = user || getUser();
-  const [chats,      setChats]      = useState([]);
-  const [activeChat, setActiveChat] = useState(null);
-  const [loading,    setLoading]    = useState(true);
-  const pollingRef = useRef(null);
+  const [chats,            setChats]           = useState([]);
+  const [activeChat,       setActiveChat]       = useState(null);
+  const [loading,          setLoading]          = useState(true);
+  // Map of roomId → true/false for sidebar dot indicator
+  const [visitorOnlineMap, setVisitorOnlineMap] = useState({});
+  const sidebarSocketRef = useRef(null);
+  const pollingRef       = useRef(null);
 
   const fetchChats = useCallback(async()=>{
     try {
@@ -536,9 +566,24 @@ function LiveChatsView({ user, incomingRequests, onAccept, onDecline, accepting 
     return ()=>clearInterval(pollingRef.current);
   },[fetchChats]);
 
-  const handleResolve = (chatId)=>{
-    setChats(prev=>prev.map(c=>c.id===chatId?{...c,status:"closed"}:c));
-    if(activeChat?.id===chatId) setActiveChat(prev=>({...prev,status:"closed"}));
+  // Listen for visitor_status events to update sidebar dots
+  useEffect(()=>{
+    const token  = getToken();
+    const socket = io(API_BASE,{withCredentials:true,auth:token?{token}:{}});
+    sidebarSocketRef.current = socket;
+
+    socket.on("visitor_status",({roomId, online})=>{
+      setVisitorOnlineMap(prev=>({ ...prev, [roomId]: online }));
+    });
+
+    return ()=>socket.disconnect();
+  },[]);
+
+  const handleResolve = (chatId) => {
+    // Update sidebar pill immediately
+    setChats(prev => prev.map(c => c.id === chatId ? { ...c, status: "closed" } : c));
+    // Update the open chat window header too
+    setActiveChat(prev => prev?.id === chatId ? { ...prev, status: "closed" } : prev);
   };
 
   const statusPill = {
@@ -546,39 +591,45 @@ function LiveChatsView({ user, incomingRequests, onAccept, onDecline, accepting 
     closed: "border border-gray-200 text-gray-400 bg-white",
   };
 
+  const pendingRequests = incomingRequests.filter(r => r.cardStatus === "pending");
+
   return (
     <div className="flex gap-4 h-[calc(100vh-148px)]">
       {/* Sidebar */}
       <div className="w-64 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden shrink-0">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <p className="text-base font-bold text-gray-900">My Chats ({chats.length})</p>
-          {incomingRequests.length>0&&(
+          {pendingRequests.length > 0 && (
             <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
-              {incomingRequests.length} new
+              {pendingRequests.length} new
             </span>
           )}
         </div>
 
-        {/* Pending requests inside Live Chats sidebar */}
-        {incomingRequests.length>0&&(
+        {/* Pending requests — only show ones not yet acted on */}
+        {pendingRequests.length > 0 && (
           <div className="border-b border-gray-100 bg-amber-50/50">
-            {incomingRequests.map(req=>(
+            {pendingRequests.map(req => (
               <div key={req.roomId} className="px-4 py-3 border-b border-amber-100 last:border-0">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-semibold text-gray-800 truncate">
-                    {req.customer||req.visitor?.name||"Visitor"}
+                    {req.customer || req.visitor?.name || "Visitor"}
                   </p>
                   <span className="text-[10px] text-amber-600 font-medium">Waiting</span>
                 </div>
-                <p className="text-xs text-gray-500 truncate mb-2">{req.issue||req.printer||"—"}</p>
+                <p className="text-xs text-gray-500 truncate mb-2">{req.issue || req.printer || "—"}</p>
                 <div className="flex gap-1.5">
-                  <button onClick={()=>onDecline(req.roomId)} disabled={accepting===req.roomId}
-                    className="flex-1 py-1 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                  <button
+                    onClick={() => onDecline(req.roomId)}
+                    disabled={accepting === req.roomId}
+                    className="flex-1 py-1 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40">
                     Decline
                   </button>
-                  <button onClick={()=>onAccept(req)} disabled={accepting===req.roomId}
-                    className="flex-1 py-1 bg-blue-500 rounded-lg text-xs font-medium text-white hover:bg-blue-600 transition-colors">
-                    {accepting===req.roomId?"…":"Accept"}
+                  <button
+                    onClick={() => onAccept(req)}
+                    disabled={accepting === req.roomId}
+                    className="flex-1 py-1 bg-blue-500 rounded-lg text-xs font-medium text-white hover:bg-blue-600 transition-colors disabled:opacity-60">
+                    {accepting === req.roomId ? "…" : "Accept"}
                   </button>
                 </div>
               </div>
@@ -591,15 +642,33 @@ function LiveChatsView({ user, incomingRequests, onAccept, onDecline, accepting 
             ? [1,2,3].map(i=><div key={i} className="px-5 py-4 space-y-2"><Skeleton cls="h-3 w-24"/><Skeleton cls="h-3 w-16"/></div>)
             : chats.length===0
               ? <div className="px-5 py-8 text-center text-xs text-gray-400">No active chats yet.</div>
-              : chats.map(c=>(
-                <div key={c.id} onClick={()=>setActiveChat(c)}
+              : chats.map(c => (
+                <div key={c.id} onClick={() => setActiveChat(c)}
                   className={`px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors ${activeChat?.id===c.id?"bg-blue-50/40 border-l-2 border-blue-400":""}`}>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{c.customer}</p>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusPill[c.status]||statusPill.closed}`}>
-                      {c.status==="active"?"Active":"Closed"}
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {/* Visitor online dot */}
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                        visitorOnlineMap[c.roomId]
+                          ? "bg-green-500"
+                          : "bg-gray-300"
+                      }`}/>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{c.customer}</p>
+                    </div>
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ml-1 transition-all ${
+                      c.status === "active"
+                        ? "bg-blue-500 text-white"
+                        : "border border-gray-200 text-gray-400 bg-white"
+                    }`}>
+                      {c.status === "active" ? "Active" : "Closed"}
                     </span>
                   </div>
+                  {/* Visitor online label */}
+                  <p className={`text-[10px] font-medium mb-0.5 ${
+                    visitorOnlineMap[c.roomId] ? "text-green-500" : "text-gray-400"
+                  }`}>
+                    {/* {visitorOnlineMap[c.roomId] ? "● Online" : "● Offline"} */}
+                  </p>
                   <p className="text-xs text-gray-500 truncate">{c.printer||"—"}</p>
                   <p className="text-xs text-gray-400 truncate mt-0.5">{c.issue||"—"}</p>
                 </div>
@@ -608,7 +677,15 @@ function LiveChatsView({ user, incomingRequests, onAccept, onDecline, accepting 
         </div>
       </div>
 
-      <LiveChatWindow chat={activeChat} currentUser={currentUser} onResolve={handleResolve}/>
+      <LiveChatWindow
+        chat={activeChat}
+        currentUser={currentUser}
+        onResolve={handleResolve}
+        initialVisitorOnline={visitorOnlineMap[activeChat?.roomId] ?? false}
+        onVisitorStatusChange={(roomId, online) =>
+          setVisitorOnlineMap(prev => ({ ...prev, [roomId]: online }))
+        }
+      />
     </div>
   );
 }
@@ -760,11 +837,19 @@ export default function AgentDashboard({ user, onLogout }) {
 
       console.log("[AgentDashboard] waiting chats:", waiting.length, waiting);
       setIncomingRequests(prev => {
-        // Keep cardStatus for requests already acted upon (accepted/declined)
-        return waiting.map(w => {
-          const existing = prev.find(p => p.roomId === w.roomId);
-          return existing ? { ...w, cardStatus: existing.cardStatus } : w;
-        });
+        // Keep cards that agent already acted on (accepted/declined) — don't remove them on poll
+        const actedOn = prev.filter(p => p.cardStatus === "accepted" || p.cardStatus === "declined");
+        const actedRoomIds = new Set(actedOn.map(p => p.roomId));
+
+        // Merge: new waiting list + preserve acted-on cards
+        const freshWaiting = waiting
+          .filter(w => !actedRoomIds.has(w.roomId)) // don't add if agent already acted
+          .map(w => {
+            const existing = prev.find(p => p.roomId === w.roomId);
+            return existing ? { ...w, cardStatus: existing.cardStatus } : w;
+          });
+
+        return [...freshWaiting, ...actedOn];
       });
     } catch (err) {
       console.error("[AgentDashboard] Failed to load waiting chats:", err.message);
@@ -803,14 +888,15 @@ export default function AgentDashboard({ user, onLogout }) {
           }]
         );
       }
-      // Another agent accepted — show as accepted on all dashboards
       if (data.action === "accepted") {
         setIncomingRequests(prev =>
-          prev.map(r => r.roomId === data.roomId
-            ? { ...r, cardStatus: r.cardStatus === "accepted" ? "accepted" : "accepted" }
-            : r
-          )
+          prev.map(r => r.roomId === data.roomId ? { ...r, cardStatus: "accepted" } : r)
         );
+        setAccepting(null);
+      }
+      // Visitor left before agent accepted — remove request card completely
+      if (data.action === "visitor_left") {
+        setIncomingRequests(prev => prev.filter(r => r.roomId !== data.roomId));
         setAccepting(null);
       }
       if (data.action === "closed") {

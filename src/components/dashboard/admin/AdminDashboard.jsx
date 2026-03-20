@@ -394,14 +394,15 @@ function ChatStatusDropdown({ status, onChange }) {
 }
 
 function AdminChatWindow({ chat, onStatusChange }) {
-  const currentUser                 = getUser();
-  const [msg,        setMsg]        = useState("");
-  const [messages,   setMessages]   = useState([]);
-  const [connected,  setConnected]  = useState(false);
-  const [chatStatus, setChatStatus] = useState(chat?.status || "waiting");
-  const [updating,   setUpdating]   = useState(false);
-  const bottomRef                   = useRef(null);
-  const socketRef                   = useRef(null);
+  const currentUser                   = getUser();
+  const [msg,          setMsg]        = useState("");
+  const [messages,     setMessages]   = useState([]);
+  const [connected,    setConnected]  = useState(false);
+  const [chatStatus,   setChatStatus] = useState(chat?.status || "waiting");
+  const [visitorOnline,setVisitorOnline] = useState(false);   // ← NEW
+  const [updating,     setUpdating]   = useState(false);
+  const bottomRef                     = useRef(null);
+  const socketRef                     = useRef(null);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
@@ -429,6 +430,22 @@ function AdminChatWindow({ chat, onStatusChange }) {
     socket.on("receive_message", (m) => {
       if (m.sender === "admin" && m.senderId === (currentUser?._id || currentUser?.id)) return;
       setMessages(prev => [...prev, { id: m._id || Date.now(), from: m.sender, text: m.text, time: m.createdAt }]);
+    });
+
+    // ← NEW: visitor online/offline indicator
+    socket.on("visitor_status", ({ roomId, online }) => {
+      if (roomId !== chat.roomId) return;
+      setVisitorOnline(online);
+      setMessages(prev => [...prev, {
+        id:   Date.now(),
+        from: "system",
+        text: online ? "Visitor is back online." : "Visitor went offline.",
+      }]);
+    });
+
+    socket.on("visitor_disconnected", () => {
+      setVisitorOnline(false);
+      setMessages(prev => [...prev, { id: Date.now(), from: "system", text: "Visitor has left the chat." }]);
     });
 
     return () => { socket.disconnect(); socketRef.current = null; };
@@ -488,7 +505,18 @@ function AdminChatWindow({ chat, onStatusChange }) {
       {/* Header */}
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-gray-800">{chat.customer}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold text-gray-800">{chat.customer}</p>
+            {/* Visitor online/offline badge */}
+            <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${
+              visitorOnline
+                ? "bg-blue-50 text-blue-700 border-blue-200"
+                : "bg-gray-100 text-gray-400 border-gray-200"
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${visitorOnline ? "bg-blue-500 animate-pulse" : "bg-gray-400"}`}/>
+              {visitorOnline ? "Visitor Online" : "Visitor Offline"}
+            </span>
+          </div>
           <p className="text-xs text-gray-400 mt-0.5">
             {chat.printer||"—"} · {chat.email||"—"} · {chat.phone||"—"}
           </p>
@@ -496,7 +524,7 @@ function AdminChatWindow({ chat, onStatusChange }) {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Live indicator */}
+          {/* Admin socket connection */}
           <span className={`w-2 h-2 rounded-full ${connected ? "bg-emerald-400" : "bg-gray-300"}`}/>
           <span className="text-xs text-gray-400 mr-1">{connected ? "Live" : "Offline"}</span>
 
@@ -569,7 +597,11 @@ function AdminChatWindow({ chat, onStatusChange }) {
     </div>
   );
 }
-
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
 
 function LiveChatsView() {
   const [chats,    setChats]    = useState([]);
@@ -1112,7 +1144,7 @@ export default function AdminDashboard({ user, onLogout }) {
           placeholder="Search here..." value={search} onChange={e=>setSearch(e.target.value)}/>
       </div>
       {activeNav==="Agents"
-        ? <button onClick={()=>setShowAddAgent(true)} className="flex items-center gap-2 bg-[#007DBA] text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-blue-600 shadow-sm whitespace-nowrap">+ Add New Agent</button>
+        ? <button onClick={()=>setShowAddAgent(true)} className="flex items-center gap-2 bg-blue-500 text-white rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-blue-600 shadow-sm whitespace-nowrap">+ Add New Agent</button>
         : <button className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm whitespace-nowrap"><Icon name="download" cls="w-3.5 h-3.5"/> Export</button>
       }
     </div>

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIG — change BASE_URL to match your FastAPI server
 // ─────────────────────────────────────────────────────────────────────────────
-const API_BASE = "https://printerexperts.online";
+const API_BASE = "http://localhost:8000";
 
 // Toggle to false to force static fallback (simulate API being down)
 const API_ENABLED = true;
@@ -170,9 +170,9 @@ function LoginPage({ onLogin }) {
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-3 mb-10">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="logo"
-              className="h-12 lg:h-14 w-auto object-contain"
+              className="h-16 lg:h-20 w-auto object-contain"
             />
         </div>
 
@@ -441,9 +441,9 @@ function DashboardPage({ user, onLogout }) {
       <aside className="w-56 bg-white border-r border-gray-100 flex flex-col py-5 px-3 shrink-0">
         <div className="flex items-center gap-2.5 px-3 mb-8">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="logo"
-              className="h-12 lg:h-14 w-auto object-contain"
+              className="h-16 lg:h-20 w-auto object-contain"
             />
         </div>
         <nav className="flex flex-col gap-0.5 flex-1">

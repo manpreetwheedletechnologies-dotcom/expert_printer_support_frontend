@@ -2,7 +2,7 @@
 // constants.js — all static config, fallback data, nav items per role
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const API_BASE    = "https://printerexperts.online";
+export const API_BASE    = "http://localhost:8000";
 export const API_ENABLED = true;
 
 export const ROLES = { ADMIN: "admin", AGENT: "agent" };

@@ -36,9 +36,9 @@ export default function DashboardLayout({
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-3 mb-8">
                      <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="logo"
-              className="h-12 lg:h-14 w-auto object-contain"
+              className="h-16 lg:h-20 w-auto object-contain"
             />
         </div>
 
