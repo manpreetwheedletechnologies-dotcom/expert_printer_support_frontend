@@ -20,11 +20,15 @@ const ISSUE_OPTIONS = [
   { label: "🔧 Other Issue",        value: "__other__" },
 ];
 
-const BRAND_OPTIONS = ["HP"];
-
-const MODELS_BY_BRAND = {
-  HP:      ["DeskJet 2700","OfficeJet Pro 9015","LaserJet Pro M404n","ENVY 6055","LaserJet MFP M428","Other"],
-};
+// Flat list of all models (no brand grouping)
+const MODEL_OPTIONS = [
+  "DeskJet 2700",
+  "OfficeJet Pro 9015",
+  "LaserJet Pro M404n",
+  "ENVY 6055",
+  "LaserJet MFP M428",
+  "Other",
+];
 
 const VALIDATORS = {
   name:        (v) => !v.trim() ? "Name cannot be empty." : v.trim().length < 2 ? "At least 2 characters." : null,
@@ -32,11 +36,10 @@ const VALIDATORS = {
   phone:       (v) => { const d = v.replace(/\D/g,""); return !v.trim() ? "Phone cannot be empty." : (d.length<7||d.length>15) ? "Phone must be 7-15 digits." : null; },
   location:    (v) => !v.trim() ? "Location cannot be empty." : v.trim().length < 2 ? "Enter a valid city or country." : null,
   issue_other: (v) => !v.trim() ? "Please describe your issue." : v.trim().length < 5 ? "Please provide more detail." : null,
-  brand_other: (v) => !v.trim() ? "Please enter your printer brand." : null,
   model_other: (v) => !v.trim() ? "Please enter your printer model." : null,
 };
 
-const INPUT_STEPS = ["name","email","phone","location","issue_other","brand_other","model_other"];
+const INPUT_STEPS = ["name","email","phone","location","issue_other","model_other"];
 
 const mapIssueType = (issue) => {
   if (!issue) return "other";
@@ -63,7 +66,7 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
   const [escalationError,setEscalationError]= useState("");
   const [chatClosed,     setChatClosed]     = useState(false);
 
-  const collected           = useRef({ issue:"",brand:"",model:"",name:"",email:"",phone:"",location:"" });
+  const collected           = useRef({ issue:"",model:"",name:"",email:"",phone:"",location:"" });
   const conversationHistory = useRef([]);
   const chatEndRef          = useRef(null);
   const socketRef           = useRef(null);
@@ -98,7 +101,6 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
   const pushSystemMsg = (text) => setMessages(prev=>[...prev,{type:"system",text}]);
   const pushAgentMsg  = (text, name) => setMessages(prev=>[...prev,{type:"agent",text, name: name || agentName}]);
 
-  // Connect visitor to Socket.IO room after chat is created
   const connectToRoom = useCallback((roomId) => {
     if (socketRef.current) socketRef.current.disconnect();
     const socket = io(API_BASE, { withCredentials: true });
@@ -129,7 +131,6 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
       }
     });
 
-    // Receive agent messages in real time
     socket.on("receive_message", (msg) => {
       if (msg.sender==="agent"||msg.sender==="admin") {
         pushAgentMsg(msg.text, msg.senderName);
@@ -147,7 +148,6 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
     });
   }, []);
 
-  // Send visitor message to agent via Socket.IO
   const sendLiveMessage = () => {
     const text = input.trim();
     if (!text||!liveChatId||chatClosed) return;
@@ -166,52 +166,83 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
   };
 
   const handleIssueSelect = (option) => {
-    if (option.value==="__other__") { pushUserMsg(option.label); setTimeout(()=>{pushBotMsg("Please describe your issue briefly.");setStep("issue_other");},400); }
-    else { pushUserMsg(option.label); collected.current.issue=option.value; setTimeout(()=>{pushBotMsg("Got it! Which printer brand are you using?");setStep("brand");},400); }
+    if (option.value==="__other__") {
+      pushUserMsg(option.label);
+      setTimeout(()=>{ pushBotMsg("Please describe your issue briefly."); setStep("issue_other"); }, 400);
+    } else {
+      pushUserMsg(option.label);
+      collected.current.issue = option.value;
+      // Skip brand — go straight to model
+      setTimeout(()=>{ pushBotMsg("Which printer model do you have?"); setStep("model"); }, 400);
+    }
   };
-  const handleBrandSelect = (brand) => {
-    if (brand==="Other") { pushUserMsg(brand); setTimeout(()=>{pushBotMsg("Please enter your printer brand.");setStep("brand_other");},400); }
-    else { pushUserMsg(brand); collected.current.brand=brand; setTimeout(()=>{pushBotMsg(`Which ${brand} model do you have?`);setStep("model");},400); }
-  };
+
   const handleModelSelect = (model) => {
-    if (model==="Other") { pushUserMsg(model); setTimeout(()=>{pushBotMsg("Please enter your printer model.");setStep("model_other");},400); }
-    else { pushUserMsg(model); collected.current.model=model; setTimeout(()=>{pushBotMsg("To connect you with a certified technician, I need a few details. Would you like to proceed?");setStep("consent");},400); }
+    if (model==="Other") {
+      pushUserMsg(model);
+      setTimeout(()=>{ pushBotMsg("Please enter your printer model."); setStep("model_other"); }, 400);
+    } else {
+      pushUserMsg(model);
+      collected.current.model = model;
+      setTimeout(()=>{ pushBotMsg("To connect you with a certified technician, I need a few details. Would you like to proceed?"); setStep("consent"); }, 400);
+    }
   };
+
   const handleConsent = (yes) => {
-    if (yes) { pushUserMsg("Yes"); setTimeout(()=>{pushBotMsg("What's your full name?");setStep("name");},400); }
-    else { pushUserMsg("No"); setTimeout(()=>{pushBotMsg("Thank you for reaching out! Come back anytime. 👋");setStep("declined");},400); }
+    if (yes) { pushUserMsg("Yes"); setTimeout(()=>{ pushBotMsg("What's your full name?"); setStep("name"); }, 400); }
+    else { pushUserMsg("No"); setTimeout(()=>{ pushBotMsg("Thank you for reaching out! Come back anytime. 👋"); setStep("declined"); }, 400); }
   };
 
   const sendMessage = () => {
-    const trimmed=input.trim();
-    const err=VALIDATORS[step]?.(trimmed);
-    if(err){setInputError(err);return;}
-    setInputError("");setInput("");pushUserMsg(trimmed);
-    if(step==="issue_other"){collected.current.issue=trimmed;setTimeout(()=>{pushBotMsg("Which printer brand are you using?");setStep("brand");},400);}
-    else if(step==="brand_other"){collected.current.brand=trimmed;setTimeout(()=>{pushBotMsg("Please enter your printer model.");setStep("model_other");},400);}
-    else if(step==="model_other"){collected.current.model=trimmed;setTimeout(()=>{pushBotMsg("Would you like to proceed?");setStep("consent");},400);}
-    else if(step==="name"){collected.current.name=trimmed;setTimeout(()=>{pushBotMsg("What's your email address?");setStep("email");},400);}
-    else if(step==="email"){collected.current.email=trimmed;setTimeout(()=>{pushBotMsg("What's your phone number?");setStep("phone");},400);}
-    else if(step==="phone"){collected.current.phone=trimmed;setTimeout(()=>{pushBotMsg("Please provide your city or country.");setStep("location");},400);}
-    else if(step==="location"){collected.current.location=trimmed;setTimeout(()=>{setStep("confirm");},400);}
+    const trimmed = input.trim();
+    const err = VALIDATORS[step]?.(trimmed);
+    if (err) { setInputError(err); return; }
+    setInputError(""); setInput(""); pushUserMsg(trimmed);
+    if (step==="issue_other") {
+      collected.current.issue = trimmed;
+      setTimeout(()=>{ pushBotMsg("Which printer model do you have?"); setStep("model"); }, 400);
+    }
+    else if (step==="model_other") {
+      collected.current.model = trimmed;
+      setTimeout(()=>{ pushBotMsg("To connect you with a certified technician, I need a few details. Would you like to proceed?"); setStep("consent"); }, 400);
+    }
+    else if (step==="name")     { collected.current.name=trimmed;     setTimeout(()=>{ pushBotMsg("What's your email address?");        setStep("email");    }, 400); }
+    else if (step==="email")    { collected.current.email=trimmed;    setTimeout(()=>{ pushBotMsg("What's your phone number?");          setStep("phone");    }, 400); }
+    else if (step==="phone")    { collected.current.phone=trimmed;    setTimeout(()=>{ pushBotMsg("Please provide your city or country."); setStep("location"); }, 400); }
+    else if (step==="location") { collected.current.location=trimmed; setTimeout(()=>{ setStep("confirm"); }, 400); }
   };
 
   const escalateToBackend = async () => {
     setEscalationError("");
     try {
-      const res=await fetch(`${API_BASE}/api/chats/new`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:collected.current.name,email:collected.current.email,phone:collected.current.phone,printerBrand:collected.current.brand,printerModel:collected.current.model,issueType:mapIssueType(collected.current.issue),initialMessage:collected.current.issue})});
-      if(!res.ok) throw new Error(`Server error ${res.status}`);
-      const data=await res.json();
+      const res = await fetch(`${API_BASE}/api/chats/new`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name:          collected.current.name,
+          email:         collected.current.email,
+          phone:         collected.current.phone,
+          printerModel:  collected.current.model,
+          issueType:     mapIssueType(collected.current.issue),
+          initialMessage:collected.current.issue,
+        }),
+      });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const data = await res.json();
       return data.roomId;
-    } catch(err) { console.warn("[PrinterBot] Escalation failed:",err.message); setEscalationError("Could not reach support. Please try again or call us directly."); return null; }
+    } catch(err) {
+      console.warn("[PrinterBot] Escalation failed:", err.message);
+      setEscalationError("Could not reach support. Please try again or call us directly.");
+      return null;
+    }
   };
 
   const handleConfirm = async () => {
     setStep("connecting");
-    const roomId=await escalateToBackend();
+    const roomId = await escalateToBackend();
     if (roomId) {
       setLiveChatId(roomId);
-      connectToRoom(roomId);   // ← KEY: visitor joins Socket.IO room
+      connectToRoom(roomId);
       pushBotMsg(`You're connected, ${collected.current.name}! ✅ Please wait while an agent joins your chat.`);
     } else {
       pushBotMsg(`Hi ${collected.current.name}, we couldn't reach our servers. Please call us directly.`);
@@ -223,16 +254,23 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
 
   const refreshChat = () => {
     socketRef.current?.disconnect(); socketRef.current=null;
-    setStep("issue");setMessages([]);setInput("");setInputError("");
-    setLiveChatId(null);setAgentConnected(false);setAgentTyping(false);setChatClosed(false);setEscalationError("");
-    collected.current={issue:"",brand:"",model:"",name:"",email:"",phone:"",location:""};
-    conversationHistory.current=[];
+    setStep("issue"); setMessages([]); setInput(""); setInputError("");
+    setLiveChatId(null); setAgentConnected(false); setAgentTyping(false); setChatClosed(false); setEscalationError("");
+    collected.current = { issue:"", model:"", name:"", email:"", phone:"", location:"" };
+    conversationHistory.current = [];
     setTimeout(()=>pushBotMsg("Hey! I'm Atlas 👋 Your printer support assistant. What issue are you facing today?",true),50);
   };
 
-  const getPlaceholder=()=>({name:"Enter your full name...",email:"Enter your email address...",phone:"Enter your phone number...",location:"Enter your city or country...",issue_other:"Describe your issue...",brand_other:"Enter your printer brand...",model_other:"Enter your printer model..."}[step]||"");
-  const showPreLiveInput=INPUT_STEPS.includes(step);
-  const modelOptions=MODELS_BY_BRAND[collected.current.brand]||["Other"];
+  const getPlaceholder = () => ({
+    name:        "Enter your full name...",
+    email:       "Enter your email address...",
+    phone:       "Enter your phone number...",
+    location:    "Enter your city or country...",
+    issue_other: "Describe your issue...",
+    model_other: "Enter your printer model...",
+  }[step] || "");
+
+  const showPreLiveInput = INPUT_STEPS.includes(step);
 
   if (isMinimized) return (
     <AnimatePresence>
@@ -282,18 +320,18 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
             </div>
 
             {/* AGENT BADGE */}
-              {step==="live"&&agentConnected&&(
-                <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}} className="mt-2 flex items-center gap-3 bg-green-50 px-3 py-2 rounded-xl border border-green-200 flex-shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    {agentName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-green-700">{agentName}</p>
-                    <p className="text-xs text-gray-500">Connected · Ready to help</p>
-                  </div>
-                  {liveChatId&&<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-mono flex-shrink-0">#{liveChatId.slice(-6)}</span>}
-                </motion.div>
-              )}
+            {step==="live"&&agentConnected&&(
+              <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}} className="mt-2 flex items-center gap-3 bg-green-50 px-3 py-2 rounded-xl border border-green-200 flex-shrink-0">
+                <div className="w-9 h-9 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                  {agentName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-green-700">{agentName}</p>
+                  <p className="text-xs text-gray-500">Connected · Ready to help</p>
+                </div>
+                {liveChatId&&<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-mono flex-shrink-0">#{liveChatId.slice(-6)}</span>}
+              </motion.div>
+            )}
 
             {/* WAITING BADGE */}
             {step==="live"&&!agentConnected&&!chatClosed&&(
@@ -316,8 +354,18 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
               <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} className="mt-3 bg-white rounded-2xl border border-[#5695D0]/40 shadow-sm p-4 flex flex-col gap-3 flex-shrink-0">
                 <p className="text-sm font-semibold text-[#286CAC] text-center">Please confirm your details</p>
                 <div className="flex flex-col gap-1.5">
-                  {[{label:"🖨️ Issue",value:collected.current.issue},{label:"🏷️ Printer",value:`${collected.current.brand} ${collected.current.model}`.trim()},{label:"👤 Name",value:collected.current.name},{label:"✉️ Email",value:collected.current.email},{label:"📞 Phone",value:collected.current.phone},{label:"📍 Location",value:collected.current.location}].map(({label,value})=>(
-                    <div key={label} className="flex items-start gap-2 text-xs"><span className="text-gray-400 w-24 flex-shrink-0">{label}</span><span className="font-medium text-gray-800 break-all">{value}</span></div>
+                  {[
+                    {label:"🖨️ Issue",   value:collected.current.issue},
+                    {label:"🖨️ Model",   value:collected.current.model},
+                    {label:"👤 Name",    value:collected.current.name},
+                    {label:"✉️ Email",   value:collected.current.email},
+                    {label:"📞 Phone",   value:collected.current.phone},
+                    {label:"📍 Location",value:collected.current.location},
+                  ].map(({label,value})=>(
+                    <div key={label} className="flex items-start gap-2 text-xs">
+                      <span className="text-gray-400 w-24 flex-shrink-0">{label}</span>
+                      <span className="font-medium text-gray-800 break-all">{value}</span>
+                    </div>
                   ))}
                 </div>
                 {escalationError&&<p className="text-xs text-red-500 text-center">{escalationError}</p>}
@@ -367,8 +415,7 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
               </AnimatePresence>
 
               {step==="issue"&&!isTyping&&(<motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} className="flex flex-wrap gap-2 mt-1">{ISSUE_OPTIONS.map(opt=><button key={opt.value} onClick={()=>handleIssueSelect(opt)} className="px-3 py-1.5 rounded-full bg-white border border-[#5695D0] text-[#286CAC] text-xs font-medium hover:bg-[#5695D0] hover:text-white transition-colors shadow-sm">{opt.label}</button>)}</motion.div>)}
-              {step==="brand"&&!isTyping&&(<motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} className="flex flex-wrap gap-2 mt-1">{BRAND_OPTIONS.map(brand=><button key={brand} onClick={()=>handleBrandSelect(brand)} className="px-3 py-1.5 rounded-full bg-white border border-[#5695D0] text-[#286CAC] text-xs font-medium hover:bg-[#5695D0] hover:text-white transition-colors shadow-sm">{brand}</button>)}</motion.div>)}
-              {step==="model"&&!isTyping&&(<motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} className="flex flex-wrap gap-2 mt-1">{modelOptions.map(model=><button key={model} onClick={()=>handleModelSelect(model)} className="px-3 py-1.5 rounded-full bg-white border border-[#5695D0] text-[#286CAC] text-xs font-medium hover:bg-[#5695D0] hover:text-white transition-colors shadow-sm">{model}</button>)}</motion.div>)}
+              {step==="model"&&!isTyping&&(<motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} className="flex flex-wrap gap-2 mt-1">{MODEL_OPTIONS.map(model=><button key={model} onClick={()=>handleModelSelect(model)} className="px-3 py-1.5 rounded-full bg-white border border-[#5695D0] text-[#286CAC] text-xs font-medium hover:bg-[#5695D0] hover:text-white transition-colors shadow-sm">{model}</button>)}</motion.div>)}
               {step==="consent"&&!isTyping&&(<motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} className="flex gap-2 mt-1"><button onClick={()=>handleConsent(true)} className="flex-1 py-2 rounded-full bg-[#5695D0] text-white text-sm font-medium hover:bg-[#286CAC] shadow-sm">✅ Yes</button><button onClick={()=>handleConsent(false)} className="flex-1 py-2 rounded-full bg-white border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 shadow-sm">✕ No</button></motion.div>)}
               {step==="declined"&&!isTyping&&(<motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} className="flex flex-col items-center gap-3 mt-4"><div className="text-4xl">👋</div><button onClick={refreshChat} className="px-4 py-2 rounded-full bg-white border border-[#5695D0] text-[#286CAC] text-xs font-medium hover:bg-[#5695D0] hover:text-white shadow-sm">Start Over</button></motion.div>)}
 
