@@ -151,12 +151,12 @@ function PrinterCard({ product }) {
       <div className="flex flex-col flex-1 px-4 pt-4 pb-5 gap-3">
 
         {/* Name */}
-        <p className="text-[13.5px] font-semibold text-gray-800 leading-snug line-clamp-4">
-          {product.name}
-        </p>
+<p className="text-[13.5px] font-semibold text-gray-800 leading-snug line-clamp-1">
+  {product.name}
+</p>
 
         {/* Price */}
-        <div className="flex items-center gap-2 mt-auto">
+        {/* <div className="flex items-center gap-2 mt-auto">
           <span className="text-[#5695D0] font-bold text-[15px]">
             ${product.price.toFixed(2)}
           </span>
@@ -165,7 +165,7 @@ function PrinterCard({ product }) {
               ${product.original_price.toFixed(2)}
             </span>
           )}
-        </div>
+        </div> */}
 
         {/* Wishlist Button OR Quantity Selector */}
         {!inWishlist ? (
