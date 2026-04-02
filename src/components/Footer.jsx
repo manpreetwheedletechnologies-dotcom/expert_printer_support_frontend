@@ -4,7 +4,7 @@ import ContactPage from "./ContactPage";
 import DisclaimerModal from "./Disclaimer";
 import { motion, AnimatePresence } from "framer-motion";
 
-function Footer({colorClass}) {
+function Footer({ colorClass }) {
   const [openContact, setOpenContact] = useState(false);
   const navLinks = [
     { label: "Privacy Policy ", path: "/" },
@@ -18,14 +18,14 @@ function Footer({colorClass}) {
     if (!element) return;
 
     const offset = 82; // header height
-    const targetPosition = element.getBoundingClientRect().top + window.scrollY - offset;
+    const targetPosition =
+      element.getBoundingClientRect().top + window.scrollY - offset;
     const startPosition = window.scrollY;
     const distance = targetPosition - startPosition;
     const duration = 800; // in milliseconds, increase for slower scroll
     let startTime = null;
 
-    const easeInOutQuad = (t) =>
-      t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
     const animation = (currentTime) => {
       if (!startTime) startTime = currentTime;
@@ -35,7 +35,6 @@ function Footer({colorClass}) {
       window.scrollTo(0, run);
       if (timeElapsed < duration) requestAnimationFrame(animation);
     };
-
   };
   return (
     <footer className={`w-full ${colorClass} text-black flex justify-center`}>
@@ -73,7 +72,8 @@ function Footer({colorClass}) {
                       </span>
                       <span
                         style={{ color: "var(--bg-color)" }}
-                        className="absolute translate-y-[150%] transition duration-300 group-hover:translate-y-0">
+                        className="absolute translate-y-[150%] transition duration-300 group-hover:translate-y-0"
+                      >
                         {item.label}
                       </span>
                     </button>
@@ -88,7 +88,7 @@ function Footer({colorClass}) {
               <ul className="space-y-2 flex flex-col items-center md:items-start">
                 <li>
                   <button
-                  onClick={() => setOpen(true)}
+                    onClick={() => setOpen(true)}
                     className="group relative inline-flex h-5 overflow-hidden text-sm font-medium cursor-pointer"
                   >
                     <span className="translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
@@ -96,7 +96,8 @@ function Footer({colorClass}) {
                     </span>
                     <span
                       style={{ color: "var(--bg-color)" }}
-                      className="absolute translate-y-[150%] transition duration-300 group-hover:translate-y-0">
+                      className="absolute translate-y-[150%] transition duration-300 group-hover:translate-y-0"
+                    >
                       Disclaimer
                     </span>
                   </button>
@@ -221,10 +222,44 @@ function Footer({colorClass}) {
 
         <div className="w-full max-w-[1240px] h-px bg-black/20 my-10" />
 
-        <p className="text-center text-xs mb-4 sm:mb-6">
-          © 2026 <span className="font-semibold">Expert Printer</span> All
-          Rights Reserved.
-        </p>
+       <div className="w-full flex flex-col sm:flex-row items-center justify-between text-xs mb-4 sm:mb-6 gap-2">
+  
+  {/* LEFT TEXT (slightly bigger) */}
+  <p className="text-sm sm:text-[13px] text-center sm:text-left">
+    © 2026 <span className="font-semibold">Expert Printer</span> All Rights Reserved.
+  </p>
+
+  {/* RIGHT TEXT (compact + link added) */}
+  <p className="flex items-center gap-1 text-[11px] sm:text-xs text-center sm:text-right">
+    Developed by{" "}
+    <a
+      href="https://wheedletechnologies.ai/"  // 👉 change if needed
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-medium hover:underline"
+    >
+      Wheedle Technologies
+    </a>
+
+    <span className="mx-1">|</span>
+
+    Made with
+    <motion.span
+  animate={{ scale: [1, 1.15, 1] }}   // smaller scale = cleaner
+  transition={{
+    repeat: Infinity,
+    duration: 1.6,      // ⏳ slower animation
+    ease: "easeInOut",
+  }}
+  className="text-red-500 inline-flex items-center justify-center"
+  style={{ lineHeight: 1 }}
+>
+  ❤️
+</motion.span>
+    for Expert Printer
+  </p>
+
+</div>
       </div>
     </footer>
   );

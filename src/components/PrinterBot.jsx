@@ -54,22 +54,27 @@ const mapIssueType = (issue) => {
 
 const PrinterBot = ({ isMinimized, setIsMinimized }) => {
   const [step,           setStep]           = useState("issue");
-  const [messages,       setMessages]       = useState([]);
-  const [input,          setInput]          = useState("");
-  const [inputError,     setInputError]     = useState("");
-  const [isTyping,       setIsTyping]       = useState(false);
-  const [showIntroText,  setShowIntroText]  = useState(false);
-  const [liveChatId,     setLiveChatId]     = useState(null);
-  const [agentConnected, setAgentConnected] = useState(false);
-  const [agentName,      setAgentName]      = useState("Support Agent");
-  const [agentTyping,    setAgentTyping]    = useState(false);
-  const [escalationError,setEscalationError]= useState("");
-  const [chatClosed,     setChatClosed]     = useState(false);
+const [messages,       setMessages]       = useState([]);
+const [input,          setInput]          = useState("");
+const [inputError,     setInputError]     = useState("");
+const [isTyping,       setIsTyping]       = useState(false);
+const [showIntroText,  setShowIntroText]  = useState(false);
+const [liveChatId,     setLiveChatId]     = useState(null);
+const [agentConnected, setAgentConnected] = useState(false);
+const [agentName,      setAgentName]      = useState("Support Agent");
+const [agentTyping,    setAgentTyping]    = useState(false);
+const [escalationError,setEscalationError]= useState("");
+const [chatClosed,     setChatClosed]     = useState(false);
+const [uploading,      setUploading]      = useState(false);
+const [replyTo,        setReplyTo] = useState(null); 
 
-  const collected           = useRef({ issue:"",model:"",name:"",email:"",phone:"",location:"" });
-  const conversationHistory = useRef([]);
-  const chatEndRef          = useRef(null);
-  const socketRef           = useRef(null);
+
+const collected           = useRef({ issue:"",model:"",name:"",email:"",phone:"",location:"" });
+const conversationHistory = useRef([]);
+const chatEndRef          = useRef(null);
+const socketRef           = useRef(null);
+const fileInputRef        = useRef(null);
+const typingTimer         = useRef(null);
 
   useEffect(() => { const t = setTimeout(()=>setIsMinimized(false),5000); return ()=>clearTimeout(t); }, []);
   useEffect(() => { chatEndRef.current?.scrollIntoView({behavior:"smooth"}); }, [messages,step,agentTyping]);
@@ -97,9 +102,90 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
       if(i>=text.length){clearInterval(iv);setIsTyping(false);}
     },16);
   };
-  const pushUserMsg   = (text) => { conversationHistory.current.push({sender:"customer",text,created_at:new Date().toISOString()}); setMessages(prev=>[...prev,{type:"user",text}]); };
-  const pushSystemMsg = (text) => setMessages(prev=>[...prev,{type:"system",text}]);
-  const pushAgentMsg  = (text, name) => setMessages(prev=>[...prev,{type:"agent",text, name: name || agentName}]);
+  const pushUserMsg = (text, replyMeta = null) => {
+  conversationHistory.current.push({
+    sender: "customer",
+    text,
+    created_at: new Date().toISOString(),
+    replyTo: replyMeta,
+  });
+
+  setMessages((prev) => [
+    ...prev,
+    { type: "user", text, messageType: "text", replyTo: replyMeta },
+  ]);
+};
+//   const pushUserMsg = (text) => {
+//   conversationHistory.current.push({ sender:"customer", text, created_at:new Date().toISOString() });
+//   setMessages((prev) => [...prev, { type:"user", text, messageType:"text" }]);
+// };
+
+const pushSystemMsg = (text) => {
+  setMessages((prev) => [...prev, { type:"system", text }]);
+};
+
+const pushAgentMsg = (text, name, replyMeta = null) => {
+  setMessages((prev) => [
+    ...prev,
+    {
+      type: "agent",
+      text,
+      name: name || agentName,
+      messageType: "text",
+      replyTo: replyMeta,
+    },
+  ]);
+};
+
+// const pushAgentMsg = (text, name) => {
+//   setMessages((prev) => [...prev, { type:"agent", text, name: name || agentName, messageType:"text" }]);
+// };
+const buildFileUrl = (url) => {
+  if (!url) return "";
+  return url.startsWith("http") ? url : `${API_BASE}${url}`;
+};
+
+const pushUserAttachmentMsg = (file, replyMeta = null) => {
+  setMessages((prev) => [
+    ...prev,
+    {
+      type: "user",
+      text: file.fileName || "Attachment",
+      messageType: file.type || "file",
+      fileUrl: buildFileUrl(file.fileUrl),
+      fileName: file.fileName || "",
+      mimeType: file.mimeType || "",
+      fileSize: file.fileSize || 0,
+      replyTo: replyMeta,
+    },
+  ]);
+};
+const pushAgentAttachmentMsg = (file, name, replyMeta = null) => {
+  setMessages((prev) => [
+    ...prev,
+    {
+      type: "agent",
+      text: file.fileName || "Attachment",
+      name: name || agentName,
+      messageType: file.type || "file",
+      fileUrl: buildFileUrl(file.fileUrl),
+      fileName: file.fileName || "",
+      mimeType: file.mimeType || "",
+      fileSize: file.fileSize || 0,
+      replyTo: replyMeta,
+    },
+  ]);
+};
+  // const pushUserMsg   = (text) => { conversationHistory.current.push({sender:"customer",text,created_at:new Date().toISOString()}); setMessages(prev=>[...prev,{type:"user",text}]); };
+  // const pushSystemMsg = (text) => setMessages(prev=>[...prev,{type:"system",text}]);
+  // const pushAgentMsg  = (text, name) => setMessages(prev=>[...prev,{type:"agent",text, name: name || agentName}]);
+  
+  const buildReplyMeta = (msg) => ({
+  id: msg.id || Date.now(),
+  text: msg.fileName || msg.text || "Attachment",
+  type: msg.messageType || "text",
+  senderName: msg.name || "Support Agent",
+});
 
   const connectToRoom = useCallback((roomId) => {
     if (socketRef.current) socketRef.current.disconnect();
@@ -110,12 +196,31 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
       socket.emit("join_chat", { roomId, visitorName: collected.current.name });
     });
 
-    socket.on("chat_history", (history) => {
-      if (!history?.length) return;
-      history.forEach(m => {
-        if (m.sender==="agent"||m.sender==="admin") pushAgentMsg(m.text, m.senderName);
-      });
-    });
+socket.on("chat_history", (history) => {
+  if (!history?.length) return;
+
+  history.forEach((m) => {
+    if (m.sender === "agent" || m.sender === "admin") {
+      if (m.senderName) setAgentName(m.senderName);
+
+      if ((m.type === "image" || m.type === "file") && m.fileUrl) {
+        pushAgentAttachmentMsg(
+          {
+            type: m.type,
+            fileUrl: m.fileUrl,
+            fileName: m.fileName,
+            mimeType: m.mimeType,
+            fileSize: m.fileSize,
+          },
+          m.senderName,
+           m.replyTo || null
+        );
+      } else {
+       pushAgentMsg(m.text, m.senderName, m.replyTo || null);
+      }
+    }
+  });
+});
 
     socket.on("agent_connected", (data) => {
       setAgentConnected(true);
@@ -131,11 +236,29 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
       }
     });
 
-    socket.on("receive_message", (msg) => {
-      if (msg.sender==="agent"||msg.sender==="admin") {
-        pushAgentMsg(msg.text, msg.senderName);
-      }
-    });
+ socket.on("receive_message", (msg) => {
+  if (msg.sender === "agent" || msg.sender === "admin") {
+    if (msg.senderName) setAgentName(msg.senderName);
+
+    if ((msg.type === "image" || msg.type === "file") && msg.fileUrl) {
+      pushAgentAttachmentMsg(
+        {
+          type: msg.type,
+          fileUrl: msg.fileUrl,
+          fileName: msg.fileName,
+          mimeType: msg.mimeType,
+          fileSize: msg.fileSize,
+        },
+        msg.senderName,
+         msg.replyTo || null
+        
+        
+      );
+    } else {
+      pushAgentMsg(msg.text, msg.senderName, msg.replyTo || null);
+    }
+  }
+});
 
     socket.on("typing_indicator", ({sender,isTyping}) => {
       if (sender==="agent"||sender==="admin") setAgentTyping(isTyping);
@@ -148,15 +271,77 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
     });
   }, []);
 
-  const sendLiveMessage = () => {
-    const text = input.trim();
-    if (!text||!liveChatId||chatClosed) return;
-    pushUserMsg(text);
-    setInput("");
-    socketRef.current?.emit("send_message",{roomId:liveChatId,text,sender:"visitor",senderId:USER_ID});
-  };
+  const uploadAttachment = async (file) => {
+  if (!liveChatId || !file) return null;
 
-  const typingTimer = useRef(null);
+  const formData = new FormData();
+  formData.append("attachment", file);
+
+  const res = await fetch(`${API_BASE}/api/chat/${liveChatId}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok || !data?.success) {
+    throw new Error(data?.message || "Upload failed");
+  }
+
+  return data.file;
+};
+
+const handleLiveAttachment = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file || !liveChatId || chatClosed || !agentConnected) return;
+
+  try {
+    setUploading(true);
+
+    const uploaded = await uploadAttachment(file);
+
+   pushUserAttachmentMsg(uploaded, replyTo);
+
+socketRef.current?.emit("send_message", {
+  roomId: liveChatId,
+  sender: "visitor",
+  senderId: USER_ID,
+  text: uploaded.fileName || "",
+  type: uploaded.type,
+  fileUrl: uploaded.fileUrl,
+  fileName: uploaded.fileName,
+  fileSize: uploaded.fileSize,
+  mimeType: uploaded.mimeType,
+  replyTo,
+});
+
+setReplyTo(null);
+  } catch (err) {
+    console.warn("[PrinterBot attachment upload failed]", err.message);
+  } finally {
+    setUploading(false);
+    e.target.value = "";
+  }
+};
+
+const sendLiveMessage = () => {
+  const text = input.trim();
+  if (!text || !liveChatId || chatClosed) return;
+
+  pushUserMsg(text, replyTo);
+  setInput("");
+
+  socketRef.current?.emit("send_message", {
+    roomId: liveChatId,
+    text,
+    sender: "visitor",
+    senderId: USER_ID,
+    type: "text",
+    replyTo,
+  });
+
+  setReplyTo(null);
+};
+  // const typingTimer = useRef(null);
   const handleLiveInput = (e) => {
     setInput(e.target.value);
     if (!liveChatId) return;
@@ -255,7 +440,7 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
   const refreshChat = () => {
     socketRef.current?.disconnect(); socketRef.current=null;
     setStep("issue"); setMessages([]); setInput(""); setInputError("");
-    setLiveChatId(null); setAgentConnected(false); setAgentTyping(false); setChatClosed(false); setEscalationError("");
+    setLiveChatId(null); setAgentConnected(false); setAgentTyping(false); setChatClosed(false); setEscalationError("");setUploading(false);
     collected.current = { issue:"", model:"", name:"", email:"", phone:"", location:"" };
     conversationHistory.current = [];
     setTimeout(()=>pushBotMsg("Hey! I'm Atlas 👋 Your printer support assistant. What issue are you facing today?",true),50);
@@ -269,6 +454,87 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
     issue_other: "Describe your issue...",
     model_other: "Enter your printer model...",
   }[step] || "");
+
+  const renderChatMessage = (msg, isDark = false) => {
+  if (msg.messageType === "image" && msg.fileUrl) {
+    return (
+      <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="block">
+        <img
+          src={msg.fileUrl}
+          alt={msg.fileName || "attachment"}
+          className="max-w-[220px] rounded-xl border border-gray-200"
+        />
+      </a>
+    );
+  }
+
+  if (msg.messageType === "file" && msg.fileUrl) {
+    return (
+      <a
+        href={msg.fileUrl}
+        target="_blank"
+        rel="noreferrer"
+        className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
+          isDark
+            ? "border-white/20 bg-white/10 text-white"
+            : "border-gray-200 bg-white text-gray-700"
+        }`}
+      >
+      <svg
+  xmlns="http://www.w3.org/2000/svg"
+  className={`w-4 h-4 ${isDark ? "text-white/80" : "text-gray-500"}`}
+  fill="none"
+  viewBox="0 0 24 24"
+  stroke="currentColor"
+  strokeWidth={2}
+>
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 10.828a4 4 0 10-5.656-5.656L6.757 10.757a6 6 0 108.486 8.486L20 13" />
+</svg>
+        <span className="text-xs font-medium truncate max-w-[180px]">
+          {msg.fileName || "Attachment"}
+        </span>
+      </a>
+    );
+  }
+
+  return <span>{msg.text}</span>;
+};
+
+const renderReplyPreview = (reply, isDark = false) => {
+  if (!reply) return null;
+
+  const isImage = reply.type === "image";
+  const isFile = reply.type === "file";
+
+  const previewText =
+    reply.text ||
+    (isImage ? "Photo" : isFile ? "Attachment" : "Message");
+
+  return (
+    <div
+      className={`mb-2 rounded-xl border-l-2 px-2.5 py-1.5 ${
+        isDark
+          ? "border-white/30 bg-white/10"
+          : "border-green-200 bg-green-50"
+      }`}
+    >
+      <p
+        className={`text-[10px] font-semibold ${
+          isDark ? "text-white/90" : "text-green-700"
+        }`}
+      >
+        {reply.senderName}
+      </p>
+      <p
+        className={`truncate text-[11px] ${
+          isDark ? "text-white/75" : "text-gray-600"
+        }`}
+      >
+        {previewText}
+      </p>
+    </div>
+  );
+};
 
   const showPreLiveInput = INPUT_STEPS.includes(step);
 
@@ -329,7 +595,9 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
                   <p className="text-sm font-semibold text-green-700">{agentName}</p>
                   <p className="text-xs text-gray-500">Connected · Ready to help</p>
                 </div>
-                {liveChatId&&<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-mono flex-shrink-0">#{liveChatId.slice(-6)}</span>}
+              <span className="max-w-[120px] truncate text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full flex-shrink-0">
+  {agentName || "Support Agent"}
+</span>
               </motion.div>
             )}
 
@@ -388,13 +656,41 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
                   if(msg.type==="agent") return(
                     <motion.div key={i} initial={{opacity:0,x:-20,scale:0.95}} animate={{opacity:1,x:0,scale:1}} transition={{duration:0.2}} className="flex flex-col items-start">
                       <span className="text-xs text-green-600 font-medium mb-0.5">{msg.name || "Support Agent"}</span>
-                      <div className="max-w-[85%] px-4 py-2 rounded-xl bg-green-500 text-white text-sm leading-relaxed">{msg.text}</div>
+                     <div className="group relative max-w-[85%] px-4 py-2 rounded-xl bg-green-500 text-white text-sm leading-relaxed">
+  {renderReplyPreview(msg.replyTo, true)}
+  {renderChatMessage(msg, true)}
+
+  <button
+    type="button"
+    onClick={() => setReplyTo(buildReplyMeta(msg))}
+    className="absolute -right-2 -top-2 hidden h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-sm group-hover:flex"
+    title="Reply"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-3.5 w-3.5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 10h10a4 4 0 014 4v7m0 0l-4-4m4 4l4-4"
+      />
+    </svg>
+  </button>
+</div>
                     </motion.div>
                   );
                   if(msg.type==="user") return(
                     <motion.div key={i} initial={{opacity:0,x:20,scale:0.95}} animate={{opacity:1,x:0,scale:1}} transition={{duration:0.2}} className="flex flex-col items-end">
                       <span className="text-xs opacity-60 mb-0.5">You</span>
-                      <div className="max-w-[85%] px-4 py-2 rounded-xl bg-white text-black text-sm leading-relaxed">{msg.text}</div>
+                      <div className="max-w-[85%] px-4 py-2 rounded-xl bg-white text-black text-sm leading-relaxed">
+  {renderReplyPreview(msg.replyTo, false)}
+  {renderChatMessage(msg, false)}
+</div>
                     </motion.div>
                   );
                   return(
@@ -436,10 +732,69 @@ const PrinterBot = ({ isMinimized, setIsMinimized }) => {
             {/* LIVE CHAT INPUT */}
             {step==="live"&&!chatClosed&&(
               <div className="mt-3 flex-shrink-0">
+                {replyTo && (
+  <div className="mb-2 flex items-start justify-between rounded-xl border border-green-200 bg-green-50 px-3 py-2">
+    <div className="min-w-0">
+      <p className="text-[11px] font-semibold text-green-700">
+        Replying to {replyTo.senderName}
+      </p>
+      <p className="truncate text-[11px] text-gray-600">
+        {replyTo.text}
+      </p>
+    </div>
+    <button
+      type="button"
+      onClick={() => setReplyTo(null)}
+      className="ml-2 text-xs text-gray-500 hover:text-black"
+    >
+      ✕
+    </button>
+  </div>
+)}
+                <input
+      ref={fileInputRef}
+      type="file"
+      className="hidden"
+      onChange={handleLiveAttachment}
+      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+    />
                 <div className={`flex gap-2 border rounded-xl px-4 py-2 bg-white/80 transition-colors ${!agentConnected?"border-amber-300/60 opacity-70":"border-green-400/60"}`}>
-                  <input value={input} onChange={handleLiveInput} placeholder={agentConnected?"Type a message...":"Waiting for agent to join..."} disabled={!agentConnected} className="flex-1 bg-transparent outline-none text-sm min-w-0 disabled:cursor-not-allowed" onKeyDown={e=>e.key==="Enter"&&agentConnected&&sendLiveMessage()}/>
-                  <button onClick={sendLiveMessage} disabled={!agentConnected||!input.trim()} className="w-8 h-8 flex-shrink-0 bg-[#5695D0] rounded-full text-white flex items-center justify-center hover:bg-[#286CAC] disabled:opacity-40 disabled:cursor-not-allowed">↑</button>
-                </div>
+  <button
+    type="button"
+    onClick={() => fileInputRef.current?.click()}
+    disabled={!agentConnected || chatClosed || uploading}
+    className="w-8 h-8 flex-shrink-0 rounded-full border border-gray-200 text-gray-500 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+    title="Attach file"
+  >
+    <svg
+  xmlns="http://www.w3.org/2000/svg"
+  className="w-4 h-4"
+  fill="none"
+  viewBox="0 0 24 24"
+  stroke="currentColor"
+  strokeWidth={2}
+>
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 10.828a4 4 0 10-5.656-5.656L6.757 10.757a6 6 0 108.486 8.486L20 13" />
+</svg>
+  </button>
+
+  <input
+    value={input}
+    onChange={handleLiveInput}
+    placeholder={agentConnected?"Type a message...":"Waiting for agent to join..."}
+    disabled={!agentConnected}
+    className="flex-1 bg-transparent outline-none text-sm min-w-0 disabled:cursor-not-allowed"
+    onKeyDown={e=>e.key==="Enter"&&agentConnected&&sendLiveMessage()}
+  />
+
+  <button
+    onClick={sendLiveMessage}
+    disabled={!agentConnected||!input.trim()}
+    className="w-8 h-8 flex-shrink-0 bg-[#5695D0] rounded-full text-white flex items-center justify-center hover:bg-[#286CAC] disabled:opacity-40 disabled:cursor-not-allowed"
+  >
+    ↑
+  </button>
+</div>
                 {!agentConnected&&<p className="text-[10px] text-amber-600 text-center mt-1">Chat will unlock when agent joins</p>}
               </div>
             )}

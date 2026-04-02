@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import AchievementsPage from '../components/AchievementsPage'
 import FaqSection from '../components/FaqSection'
 import Footer from '../components/Footer'
@@ -12,6 +14,34 @@ import ServicesSection from '../components/Services'
 import CertificateSection from '../components/Certificatesection'
 import Aboutus from '../components/Aboutus'
 function LandingPage() {
+ const location = useLocation();
+  const navigate = useNavigate();
+
+useEffect(() => {
+  if (location.state?.scrollTo) {
+    const targetId = location.state.scrollTo;
+
+    const timer = setTimeout(() => {
+      const element = document.getElementById(targetId);
+
+      if (element) {
+        const offset = 82;
+        const targetPosition =
+          element.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({
+          top: targetPosition,
+          behavior: "smooth",
+        });
+      }
+
+      navigate(location.pathname, { replace: true, state: {} });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }
+}, [location, navigate]);
+
   return (
     <>
     <Header/>

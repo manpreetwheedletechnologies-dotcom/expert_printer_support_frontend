@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import ContactPage from "./ContactPage";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
 import { useWishlistCount } from "../lib/wishlist";
 import WishlistDrawer from "./Wishlist";
+
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -102,9 +103,27 @@ function Header() {
     requestAnimationFrame(animation);
     setMobileMenuOpen(false);
   };
+  const handleBlogNavigation = () => {
+  if (location.pathname === "/") {
+    scrollToSection("blog");
+  } else {
+    navigate("/", { state: { scrollTo: "blog" } });
+    setMobileMenuOpen(false);
+  }
+};
+const handleFaqNavigation = () => {
+  if (location.pathname === "/") {
+    scrollToSection("faq");
+  } else {
+    navigate("/", { state: { scrollTo: "faq" } });
+    setMobileMenuOpen(false);
+  }
+};
+
 
   const closeWishlist = useCallback(() => setWishlistOpen(false), []);
 const location = useLocation();
+const navigate = useNavigate();
 
   return (
     <>
@@ -129,13 +148,7 @@ const location = useLocation();
 
           {/* ── Desktop Nav ── */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
-{navLinks
-  .filter(
-    (link) =>
-      location.pathname === "/" ||
-      (link.name !== "Blog" && link.name !== "FAQ")
-  )
-  .map((link, index, arr) => (
+{navLinks.map((link, index, arr) => (
     <div key={link.name} className="flex items-center gap-6 xl:gap-8">
       {link.name === "Home" || link.name === "Service" ? (
         <NavLink
@@ -155,7 +168,11 @@ const location = useLocation();
         </NavLink>
       ) : (
         <button
-          onClick={() => scrollToSection(link.name.toLowerCase())}
+        onClick={() => {
+  if (link.name === "Blog") return handleBlogNavigation();
+  if (link.name === "FAQ") return handleFaqNavigation();
+  return scrollToSection(link.name.toLowerCase());
+}}
           className="group relative h-6 overflow-hidden text-[15px] xl:text-[16px] font-medium transition-all duration-300 text-black/80 cursor-pointer"
         >
           <span className="block translate-y-0 transition duration-300 group-hover:-translate-y-[150%]">
@@ -291,7 +308,11 @@ const location = useLocation();
                     </NavLink>
                   ) : (
                     <NavLink
-                      onClick={() => scrollToSection(link.name.toLowerCase())}
+                    onClick={() => {
+  if (link.name === "Blog") return handleBlogNavigation();
+  if (link.name === "FAQ") return handleFaqNavigation();
+  return scrollToSection(link.name.toLowerCase());
+}}
                       className="block w-full py-4 text-xl text-center font-medium transition-colors duration-200 text-white hover:text-[#007DBA]"
                     >
                       {link.name}
