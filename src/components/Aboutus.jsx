@@ -77,18 +77,27 @@ function Aboutus() {
                                 about us
                             </h3>
                             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight">
-                                Reliable Printer Support
+                                Effortless Printer Performance,
                                 <br />
-                                You Can Count On
+                                Backed by Experts
                             </h1>
                         </div>
 
                         <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                            Dealing with printer errors, slow performance, or constant connection issues? You don’t have to figure it out alone. Our expert printer support services are designed to quickly diagnose problems, fix errors, and keep your printer running smoothly—without the stress.
+                            At Printer Expert, we specialize in delivering reliable online printer support designed to keep
+                            your workflow uninterrupted. Our team is committed to providing professional printer help
+                            with a focus on speed, accuracy, and long-term performance.
+                            Whether you're an individual
+                            user or a business searching for printer help near me, we offer tailored solutions to meet
+                            your specific needs.
                             <br />
-                            Whether it’s setup issues, driver problems, paper jams, or network errors, our skilled technicians provide clear, effective solutions tailored to your printer model. We focus on fast response, accurate troubleshooting, and long-term reliability so you can get back to work without interruptions.
+                            From resolving common issues like printer status offline to handling
+                            setup, connectivity, and performance challenges, we ensure your devices operate
+                            seamlessly. With a service-first approach and technical expertise, we aim to be your trusted partner for
+                            consistent, efficient, and hassle-free printing solutions.
                             <br /><br />
-                            Contact Expert Printer Support at +1-702-555-0122 for dependable, straightforward assistance whenever you need it.
+                            Contact Expert Printer Support at +1-702-555-0122 for dependable, straightforward
+                            assistance whenever you need it.
                         </p>
                         <div style={{ backgroundColor: "var(--bg-color)" }} className="w-40 sm:w-60 lg:w-80 h-1"></div>
                     </div>

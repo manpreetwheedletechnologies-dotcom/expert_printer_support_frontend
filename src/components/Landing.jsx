@@ -81,50 +81,50 @@ const PrinterSupportHero = () => {
             {/* ── LEFT: Text content ── */}
             <div className="text-white space-y-5 sm:space-y-6">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                Expert Systems Assistance & Authorized Hardware Solutions.
+                Reliable Online Printer Support & Expert Printer Help - Anytime, Anywhere
               </h1>
 
               <p className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed">
-                Patient, live online guidance for seniors and home offices. We help you stay connected without the frustration.
-              </p>
+                Get fast, professional online printer support for setup, troubleshooting, and repairs. From
+                home users to businesses, we keep your printers running smoothly.</p>
               <NavLink to="/support">
-              <button
-                style={{ backgroundColor: "var(--bg-color)" }}
-                className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-lg cursor-pointer px-6 font-medium text-white"
-              >
-                <span>Get Live Help Now</span>
+                <button
+                  style={{ backgroundColor: "var(--bg-color)" }}
+                  className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-lg cursor-pointer px-6 font-medium text-white"
+                >
+                  <span>Get Live Help Now</span>
 
-                <div className="w-0 translate-x-[100%] pl-0 opacity-0 transition-all duration-200 group-hover:w-5 group-hover:translate-x-0 group-hover:pl-1 group-hover:opacity-100">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 15 15"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                  >
-                    <path
-                      d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z"
-                      fill="currentColor"
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </button>
-             </NavLink>
+                  <div className="w-0 translate-x-[100%] pl-0 opacity-0 transition-all duration-200 group-hover:w-5 group-hover:translate-x-0 group-hover:pl-1 group-hover:opacity-100">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 15 15"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z"
+                        fill="currentColor"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </button>
+              </NavLink>
             </div>
 
             {/* ── RIGHT: Form ── */}
             <div className="w-full">
               <div className="bg-white rounded-3xl shadow-xl p-5 sm:p-7 lg:p-9 transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1.5 sm:mb-2">
-                  Having trouble with your printer?
+                  Is your printer not working properly?
                 </h2>
 
                 <p className="text-xs sm:text-sm lg:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">
-                  Please provide details about the issue you are experiencing.
-                  Our technical support team will contact you promptly.
+                  Fill out the form and get connected instantly. Our team provides fast, reliable online printer
+                  support to diagnose and resolve your printer problems.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">

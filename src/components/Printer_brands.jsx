@@ -151,9 +151,9 @@ function PrinterCard({ product }) {
       <div className="flex flex-col flex-1 px-4 pt-4 pb-5 gap-3">
 
         {/* Name */}
-<p className="text-[13.5px] font-semibold text-gray-800 leading-snug line-clamp-1">
-  {product.name}
-</p>
+        <p className="text-[13.5px] font-semibold text-gray-800 leading-snug line-clamp-1">
+          {product.name}
+        </p>
 
         {/* Price */}
         {/* <div className="flex items-center gap-2 mt-auto">
@@ -209,6 +209,27 @@ function PrinterCard({ product }) {
 export default function PrinterListing() {
   const [printers, setPrinters] = useState([]);
   const [loading, setLoading] = useState(true);
+      const text = "Pick Your Printer";
+    const [displayText, setDisplayText] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [index, setIndex] = useState(0);
+    useEffect(() => {
+        const typingSpeed = isDeleting ? 30 : 60;
+
+        const timeout = setTimeout(() => {
+            if (!isDeleting) {
+                setDisplayText(text.slice(0, index + 1));
+                setIndex(index + 1);
+                if (index + 1 === text.length) setTimeout(() => setIsDeleting(true), 1000);
+            } else {
+                setDisplayText(text.slice(0, index - 1));
+                setIndex(index - 1);
+                if (index - 1 === 0) setIsDeleting(false);
+            }
+        }, typingSpeed);
+
+        return () => clearTimeout(timeout);
+    }, [index, isDeleting]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -219,9 +240,9 @@ export default function PrinterListing() {
         // ✅ FIX: API returns { success, data: { success, count, data: [...] } }
         // so we unwrap json.data.data to get the actual printer array
         const list =
-          Array.isArray(json?.data?.data)   ? json.data.data   // nested: { data: { data: [...] } }
-          : Array.isArray(json?.data)        ? json.data        // flat:   { data: [...] }
-          : [];
+          Array.isArray(json?.data?.data) ? json.data.data   // nested: { data: { data: [...] } }
+            : Array.isArray(json?.data) ? json.data        // flat:   { data: [...] }
+              : [];
 
         const formatted = list.map((item, i) => ({
           id: item.id ?? `hp-${i}`,
@@ -255,9 +276,7 @@ export default function PrinterListing() {
   return (
     <section className="py-14 px-4">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          Pick Your Printer
-        </h2>
+        <h2 className="text-4xl font-bold text-center text-gray-900 mb-10"> {displayText} < span className="animate-pulse" >| </span></h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {printers.map((printer) => (
             <PrinterCard key={printer.id} product={printer} />

@@ -11,8 +11,8 @@ function SupportPage() {
   return (
         <>
     <Header/>
-    <Hero_hp title="Instant Device Setup & Connectivity Assistance. " subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-     eiusmod tempor incididunt ut labore et dolore magna aliqua." themeImage="/printer_su.webp"/>
+    <Hero_hp title="Instant Device Setup & Connectivity Assistance. " subtitle="Comprehensive printer support solutions designed to keep your devices
+running smoothly and efficiently." themeImage="/printer_su.webp"/>
     <Helpform/>
     <ServicesSection colorClass="bg-[#007DBA0D]"/>
     <Testimonials/>

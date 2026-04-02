@@ -83,18 +83,15 @@ function AchievementsPage() {
             </div>
 
             <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-              At Printer Expert, we hold the court in the competitive marketing
-              world with our AI-Powered Printer Help Desk that acts as your
-              personal printer support assistant for multiple leading printer
-              brands and models. We provide professional troubleshooting and
-              maintenance services for popular brands such as HP, Canon, Epson,
-              Brother, Ricoh, Xerox, Samsung, Panasonic, Fujitsu, Kyocera,
-              Konica Minolta, Tally, and many more. From driver updates and
-              connectivity issues to paper jams and performance errors, all you
-              need to do is contact us and our experts will get back to yoy. Or
-              you can just tell our own “AI Bot Help Desk” that we have
-              customized and trained to behave as your personal online printer
-              support hub.
+              At Printer Expert, we provide reliable online printer support through our AI-powered help
+desk, acting as your personal printer help assistant for leading brands like HP, Canon, Epson,
+Brother, Ricoh, Xerox, Samsung, Panasonic, Fujitsu, Kyocera, Konica Minolta, Tally, and
+more. From HP printer support and setup assistance to resolving issues like printer status
+offline, connectivity errors, paper jams, and performance problems, our experts ensure
+quick and effective solutions. All you need to do is contact us and our experts will get back
+to you.
+You can also rely on our AI Bot Help Desk for fast, accurate support, your all-in-one online
+printer support hub.
             </p>
             <div style={{ backgroundColor: "var(--bg-color)" }} className="w-40 sm:w-60 lg:w-80 h-1"></div>
           </div>
