@@ -3,6 +3,7 @@ import { useState } from "react";
 import ContactPage from "./ContactPage";
 import DisclaimerModal from "./Disclaimer";
 import { motion, AnimatePresence } from "framer-motion";
+import { Heart } from "lucide-react";
 
 function Footer({colorClass}) {
   const [openContact, setOpenContact] = useState(false);
@@ -221,10 +222,48 @@ function Footer({colorClass}) {
 
         <div className="w-full max-w-[1240px] h-px bg-black/20 my-10" />
 
-        <p className="text-center text-xs mb-4 sm:mb-6">
-          © 2026 <span className="font-semibold">Expert Printer</span> All
-          Rights Reserved.
-        </p>
+       <motion.div
+  initial={{ opacity: 0, y: 10 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, ease: "easeOut" }}
+  viewport={{ once: true }}
+  className="flex flex-col items-center gap-2 text-center mb-4 sm:mb-6 px-4"
+>
+  {/* Copyright */}
+  <p className="text-xs text-black/70">
+    © 2026 <span className="font-semibold text-black">Expert Printer</span> All Rights Reserved.
+  </p>
+
+  {/* Developed By */}
+  <p className="text-[11px] sm:text-xs text-black/60 flex items-center flex-wrap justify-center gap-1">
+    
+    <span>Crafted with</span>
+
+    {/* Animated Heart */}
+    <motion.span
+      animate={{ scale: [1, 1.2, 1] }}
+      transition={{ repeat: Infinity, duration: 1.2 }}
+      className="text-red-500 flex items-center"
+    >
+      <Heart size={14} fill="currentColor" />
+    </motion.span>
+
+    <span>by</span>
+
+    {/* Company Link */}
+    <a
+      href="https://wheedletechnologies.ai/" // change if needed
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative font-medium text-black hover:text-[var(--bg-color)] transition duration-300 group"
+    >
+      Wheedle Technologies
+
+      {/* Premium underline animation */}
+      <span className="absolute left-0 -bottom-[2px] h-[1px] w-0 bg-[var(--bg-color)] transition-all duration-300 group-hover:w-full"></span>
+    </a>
+  </p>
+</motion.div>
       </div>
     </footer>
   );
